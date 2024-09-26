@@ -3,13 +3,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: example-web-go
-  name: example-web-go
+    app: example-frontend
+  name: example-frontend
 spec:
   ports:
   - port: 5000
     protocol: TCP
     targetPort: 5000
   selector:
-    app: example-web-go
+    app: example-frontend
   type: ClusterIP

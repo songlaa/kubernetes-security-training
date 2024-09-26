@@ -1,5 +1,5 @@
 ---
-title: "Deploying a container image"
+title: "Deployments"
 weight: 2
 sectionnumber: 1.2
 ---
@@ -41,7 +41,7 @@ kubectl apply -f pod_awesome-app.yaml --namespace <namespace>
 ```
 
 The output should be:
-
+as
 ```
 pod/awesome-app created
 ```
@@ -69,52 +69,64 @@ kubectl delete pod awesome-app --namespace <namespace>
 
 In some use cases it can make sense to start a single Pod. But this has its downsides and is not really a common practice. Let's look at another concept which is tightly coupled with the Pod: the so-called _Deployment_. A Deployment ensures that a Pod is monitored and checks that the number of running Pods corresponds to the number of requested Pods.
 
-To create a new Deployment we first define our Deployment in a new file `deployment_example-web-go.yaml` with the content below.
+To create a new Deployment we first define our Deployment in a new file `deployment_example-frontend.yaml` with the content below.
 
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: example-web-go
-  name: example-web-go
+    app: example-frontend
+  name: example-frontend
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      app: example-web-go
+      app: example-frontend
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+    type: RollingUpdate
   template:
     metadata:
       labels:
-        app: example-web-go
+        app: example-frontend
     spec:
       containers:
-        - image: {{% param "containerImages.deployment-image-url" %}}
-          name: example-web-go
+        - image: quay.io/acend/example-web-python:latest
+          name: example-frontend
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
           resources:
-            requests:
-              cpu: 10m
-              memory: 16Mi
             limits:
-              cpu: 20m
-              memory: 32Mi
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 128Mi
 ```
 
 And with this we create our Deployment inside our already created namespace:
 
 ```bash
-kubectl apply -f deployment_example-web-go.yaml --namespace <namespace>
+kubectl apply -f deployment_example-frontend.yaml --namespace <namespace>
 ```
 
 The output should be:
 
 ```
-deployment.apps/example-web-go created
+deployment.apps/example-frontend created
 ```
 
-We're using a simple sample application written in Go, which you can find built as an image on [Quay.io](https://quay.io/repository/acend/example-web-go/) or as source code on [GitHub](https://github.com/acend/awesome-apps).
-
 kubernetes creates the defined and necessary resources, pulls the container image (in this case from Quay.io) and deploys the Pod.
+
+Examine the deployment yaml more closely and discuss it with each other. Where do we configure our resource usage and how do we handle High Availabilty and our update strategy in our code?
 
 Use the command `kubectl get` with the `-w` parameter in order to get the requested resources and afterward watch for changes.
 
@@ -152,7 +164,7 @@ However, the result is the same. The helper commands just simplify the process o
 As an example, let's look at creating above deployment, this time using a helper command instead. If you already created the Deployment using above YAML definition, you don't have to execute this command:
 
 ```yaml
-kubectl create deployment example-web-go --image={{% param "containerImages.deployment-image-url" %}} --namespace <namespace>
+kubectl create deployment example-frontend --image={{% param "containerImages.deployment-image-url" %}} --namespace <namespace>
 ```
 
 It's important to know that these helper commands exist.
@@ -179,7 +191,7 @@ A [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deploym
 By using the `-o` (or `--output`) parameter we get a lot more information about the deployment itself. You can choose between YAML and JSON formatting by indicating `-o yaml` or `-o json`. In this training we are going to use YAML, but please feel free to replace `yaml` with `json` if you prefer.
 
 ```bash
-kubectl get deployment example-web-go -o yaml --namespace <namespace>
+kubectl get deployment example-frontend -o yaml --namespace <namespace>
 ```
 
 After the image has been pulled, kubernetes deploys a Pod according to the Deployment:
@@ -192,7 +204,7 @@ which gives you an output similar to this:
 
 ```
 NAME                              READY   STATUS    RESTARTS   AGE
-example-web-go-69b658f647-xnm94   1/1     Running   0          39s
+example-frontend-69b658f647-xnm94   1/1     Running   0          39s
 ```
 
 The Deployment defines that one replica should be deployed --- which is running as we can see in the output. This Pod is not yet reachable from outside the cluster.

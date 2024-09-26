@@ -4,8 +4,6 @@ weight: 1
 sectionnumber: 1.1
 ---
 
-In this lab, we will introduce the core concepts of Kubernetes.
-
 All explanations and resources used in this lab give only a quick and not detailed overview. Please check [the official documentation](https://kubernetes.io/docs/concepts/) to get further details.
 
 ## Core concepts
@@ -98,6 +96,14 @@ A Service is unique inside a Namespace.
 
 ### Deployment
 
+Deployments in Kubernetes are used to manage and control the lifecycle of applications, ensuring that the desired state of an application is maintained over time. They allow you to define how to create and manage **Pods** and handle updates, scaling, and rollbacks efficiently.
+
+Key features of Deployments:
+
+* Define and manage **Pod** replicas.
+* Enable rolling updates and rollbacks to minimize downtime.
+* Ensure high availability through automatic restarts of failed containers.
+
 Have a look at the [official documentation](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/).
 
 ### Volume
@@ -107,3 +113,25 @@ Have a look at the [official documentation](https://kubernetes.io/docs/concepts/
 ### Job
 
 Have a look at the [official documentation](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/).
+
+### ConfigMaps
+
+ConfigMaps allow you to decouple environment-specific configuration from containerized applications, storing non-sensitive data such as environment variables, configuration files, and command-line arguments. They provide flexibility in managing configurations without needing to rebuild the container image.
+
+Key features of ConfigMaps:
+
+* Store non-sensitive data.
+* Facilitate dynamic configuration management.
+* Simplify application deployment and updates by keeping configuration external.
+
+---
+
+### Secrets
+
+Secrets are specifically designed to handle sensitive data, such as passwords, API keys, and TLS certificates. They store this information in a base64-encoded format, ensuring that sensitive data is kept secure and only accessible by authorized components.
+
+Key features of Secrets:
+
+* Securely store sensitive data.
+* Prevent accidental exposure of critical information.
+* Access control ensures only authorized entities can read them.

@@ -4,11 +4,13 @@ weight: 3
 sectionnumber: 1.3
 ---
 
-In this lab, we are going to make the freshly deployed application from the last lab available online.
+In this lab, we are going to make the frontend from the last lab available online.
 
 ## {{% task %}} Create a ClusterIP Service
 
-The command `kubectl apply -f deployment_example-web-go.yaml` from the last lab creates a Deployment but no Service. A kubernetes Service is an abstract way to expose an application running on a set of Pods as a network service. For some parts of your application (for example, frontends) you may want to expose a Service to an external IP address which is outside your cluster.
+The command `kubectl apply -f deployment_example-frontend.yaml` from the last lab creates a Deployment but no Service.
+
+A kubernetes Service is an abstract way to expose an application running on a set of Pods as a network service. For some parts of your application (for example, frontends) you may want to expose a Service to an external IP address which is outside your cluster.
 
 kubernetes `ServiceTypes` allow you to specify what kind of Service you want. The default is `ClusterIP`.
 
@@ -22,25 +24,27 @@ kubernetes `ServiceTypes` allow you to specify what kind of Service you want. Th
 
 * `ExternalName`: Maps the Service to the contents of the externalName field (e.g. foo.bar.example.com), by returning a CNAME record with its value. No proxying of any kind is set up.
 
-You can also use Ingress to expose your Service. Ingress is not a Service type, but it acts as the entry point for your cluster. [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) exposes HTTP and HTTPS routes from outside the cluster to services within the cluster.
+You can also use Ingress to expose your Service.
+
+Ingress is not a Service type, but it acts as the entry point for your cluster. [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) exposes HTTP and HTTPS routes from outside the cluster to services within the cluster.
 Traffic routing is controlled by rules defined on the Ingress resource. An Ingress may be configured to give Services externally reachable URLs, load balance traffic, terminate SSL / TLS, and offer name-based virtual hosting. An Ingress controller is responsible for fulfilling the route, usually with a load balancer, though it may also configure your edge router or additional frontends to help handle the traffic.
 
 In order to create an Ingress, we first need to create a Service of type [ClusterIP](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types).
 
-To create the Service add a new file `svc-web-go.yaml` with the following content:
+To create the Service add a new file `svc-frontend.yaml` with the following content:
 
-{{< readfile file="/content/en/docs/kubernetes-basics/01-Basics/01/svc-web-go.yaml" code="true" lang="yaml" >}}
+{{< readfile file="/content/en/docs/kubernetes-basics/01-Basics/01/svc-example-frontend.yaml" code="true" lang="yaml" >}}
 
 And then apply the file with:
 
 ```bash
-kubectl apply -f svc-web-go.yaml --namespace <namespace>
+kubectl apply -f svc-frontend.yaml --namespace <namespace>
 ```
 
 There is also am imperative command to create a service and expose your application which can be used instead of the yaml file with the `kubectl apply ...` command
 
 ```
-kubectl expose deployment example-web-go --type=ClusterIP --name=example-web-go --port=5000 --target-port=5000 --namespace <namespace>
+kubectl expose deployment example-frontend --type=ClusterIP --name=example-frontend --port=5000 --target-port=5000 --namespace <namespace>
 ```
 
 Let's have a more detailed look at our Service:
@@ -53,7 +57,7 @@ Which gives you an output similar to this:
 
 ```bash
 NAME             TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
-example-web-go   ClusterIP  10.43.91.62   <none>        5000/TCP
+example-frontend   ClusterIP  10.43.91.62   <none>        5000/TCP
 ```
 
 {{% alert title="Note" color="info" %}}
@@ -63,7 +67,7 @@ Service IP (CLUSTER-IP) addresses stay the same for the duration of the Service'
 By executing the following command:
 
 ```bash
-kubectl get service example-web-go -o yaml --namespace <namespace>
+kubectl get service example-frontend -o yaml --namespace <namespace>
 ```
 
 You get additional information:
@@ -74,10 +78,10 @@ kind: Service
 metadata:
   ...
   labels:
-    app: example-web-go
+    app: example-frontend
   managedFields:
     ...
-  name: example-web-go
+  name: example-frontend
   namespace: <namespace>
   ...
 spec:
@@ -88,7 +92,7 @@ spec:
     protocol: TCP
     targetPort: 5000
   selector:
-    app: example-web-go
+    app: example-frontend
   sessionAffinity: None
   type: ClusterIP
 status:
@@ -98,13 +102,13 @@ status:
 The Service's `selector` defines which Pods are being used as Endpoints. This happens based on labels. Look at the configuration of Service and Pod in order to find out what maps to what:
 
 ```bash
-kubectl get service example-web-go -o yaml --namespace <namespace>
+kubectl get service example-frontend -o yaml --namespace <namespace>
 ```
 
 ```
 ...
   selector:
-    app: example-web-go
+    app: example-frontend
 ...
 ```
 
@@ -123,22 +127,22 @@ Let's have a look at the label section of the Pod and verify that the Service se
 ```
 ...
   labels:
-    app: example-web-go
+    app: example-frontend
 ...
 ```
 
 This link between Service and Pod can also be displayed in an easier fashion with the `kubectl describe` command:
 
 ```bash
-kubectl describe service example-web-go --namespace <namespace>
+kubectl describe service example-frontend --namespace <namespace>
 ```
 
 ```
-Name:                     example-web-go
+Name:                     example-frontend
 Namespace:                example-ns
-Labels:                   app=example-web-go
+Labels:                   app=example-frontend
 Annotations:              <none>
-Selector:                 app=example-web-go
+Selector:                 app=example-frontend
 Type:                     ClusterIP
 IP:                       10.39.240.212
 Port:                     <unset>  5000/TCP
@@ -156,51 +160,51 @@ The `Endpoints` show the IP addresses of all currently matched Pods.
 ## {{% task %}} Expose the Service
 
 With the ClusterIP Service ready, we can now create the Ingress resource.
-In order to create the Ingress resource, we first need to create the file `ing-example-web-go.yaml` and change the `host` entry to match your environment:
+In order to create the Ingress resource, we first need to create the file `ing-example-frontend.yaml` and change the `host` entry to match your environment:
 
 {{% onlyWhenNot customer %}}
 {{< readfile file="/content/en/docs/kubernetes-basics/01-Basics/01/ingress.template.yaml" code="true" lang="yaml" >}}
 {{% /onlyWhenNot %}}
 
-As you see in the resource definition at `spec.rules[0].http.paths[0].backend.service.name` we use the previously created `example-web-go` ClusterIP Service.
+As you see in the resource definition at `spec.rules[0].http.paths[0].backend.service.name` we use the previously created `example-frontend` ClusterIP Service.
 
 Let's create the Ingress resource with:
 
 ```bash
-kubectl apply -f ing-example-web-go.yaml --namespace <namespace>
+kubectl apply -f ing-example-frontend.yaml --namespace <namespace>
 ```
 
-Afterwards, we are able to access our freshly created Ingress at `http://example-web-go-<namespace>.<appdomain>`
+Afterwards, we are able to access our freshly created Ingress at `http://example-frontend-<namespace>.<appdomain>`
 
 {{% onlyWhen openshift %}}
 {{% onlyWhenNot baloise %}}
 
 ```bash
-oc expose service example-web-go --namespace <namespace>
+oc expose service example-frontend --namespace <namespace>
 ```
 
 The output should be:
 
 ```
-route.route.openshift.io/example-web-go exposed
+route.route.openshift.io/example-frontend exposed
 ```
 
-We are now able to access our app via the freshly created route at `http://example-web-go-<namespace>.<appdomain>`
+We are now able to access our app via the freshly created route at `http://example-frontend-<namespace>.<appdomain>`
 
 {{% /onlyWhenNot %}}
 {{% onlyWhen baloise %}}
 
 ```bash
-oc create route edge example-web-go --service example-web-go --namespace <namespace>
+oc create route edge example-frontend --service example-frontend --namespace <namespace>
 ```
 
 The output should be:
 
 ```
-route.route.openshift.io/example-web-go created
+route.route.openshift.io/example-frontend created
 ```
 
-We are now able to access our app via the freshly created route at `https://example-web-go-<namespace>.<appdomain>`
+We are now able to access our app via the freshly created route at `https://example-frontend-<namespace>.<appdomain>`
 
 {{% /onlyWhen %}}
 
@@ -227,22 +231,22 @@ This is an advanced lab, so feel free to skip this. NodePorts are usually not us
 
 There's a second option to make a Service accessible from outside: Use a [NodePort](https://kubernetes.io/docs/concepts/services-networking/service/#nodeport).
 
-In order to switch the Service type, change the existing `ClusterIP` Service by updating our Service definition in file `svc-web-go.yaml`to:
+In order to switch the Service type, change the existing `ClusterIP` Service by updating our Service definition in file `svc-frontend.yaml`to:
 
 ```yaml
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: example-web-go
-  name: example-web-go
+    app: example-frontend
+  name: example-frontend
 spec:
   ports:
   - port: 5000
     protocol: TCP
     targetPort: 5000
   selector:
-    app: example-web-go
+    app: example-frontend
   type: NodePort
 
 ```
@@ -250,7 +254,7 @@ spec:
 And then apply again with:
 
 ```bash
-kubectl apply -f svc-web-go.yaml --namespace <namespace>
+kubectl apply -f svc-frontend.yaml --namespace <namespace>
 ```
 
 Let's have a more detailed look at our new `NodePort` Service:
@@ -263,7 +267,7 @@ Which gives you an output similar to this:
 
 ```bash
 NAME             TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
-example-web-go   NodePort   10.43.91.62   <none>        5000:30692/TCP
+example-frontend   NodePort   10.43.91.62   <none>        5000:30692/TCP
 ```
 
 The `NodePort` number is assigned by Kubernetes and stays the same as long as the Service is not deleted. A NodePort Service is more suitable for infrastructure tools than for public URLs.
