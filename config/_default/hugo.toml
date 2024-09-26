@@ -44,7 +44,7 @@ anchor = "smart"
 
 [Languages]
 [Languages.en]
-title = "Kubernetes Basics Training"
+title = "Kubernetes Security Training"
 languageName = "English"
 weight = 1
 
