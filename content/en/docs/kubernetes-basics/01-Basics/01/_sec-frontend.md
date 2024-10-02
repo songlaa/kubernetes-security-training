@@ -178,7 +178,9 @@ If you looked closely at the example you might have spotted `allowPrivilegeEscal
 
 ## {{% task %}} Mandatory Access Control
 
-The default seccomp profiles for containers in Kubernetes depend on the underlying container runtime (Docker, containerd, CRI-O) and the Kubernetes distribution itself. Most distributions use the RuntimeDefault profile provided by the container runtime, but the actual system call restrictions may differ slightly based on the runtime’s configuration. Most container runtimes provide a sane set of default syscalls that are allowed or not. You can adopt these defaults for your workload by setting the seccomp type in the security context of a pod or container to RuntimeDefault:
+The default seccomp profiles for containers in Kubernetes depend on the underlying container runtime (Docker, containerd, CRI-O) and the Kubernetes distribution itself. Most distributions use the RuntimeDefault profile provided by the container runtime, but the actual system call restrictions may differ slightly based on the runtime’s configuration. Most container runtimes provide a sane set of default syscalls that are allowed or not.
+
+You could adopt these defaults for your workload by setting the seccomp type in the security context of a pod or container to RuntimeDefault:
 
 ```
 spec:
