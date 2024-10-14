@@ -176,7 +176,7 @@ If you need to run as root but want the added security of user-namespaces, kuber
 
 If you looked closely at the example you might have spotted `allowPrivilegeEscalation` set to `false` for the container. This controls whether a process can gain additional privileges (e.g., by using setuid binaries). By default, this is true unless overridden, but it's recommended to set it to false to prevent privilege escalation, so we did that too.
 
-## {{% task %}} Mandatory Access Control
+## {{% task %}} Seccomp profile
 
 The default seccomp profiles for containers in Kubernetes depend on the underlying container runtime (Docker, containerd, CRI-O) and the Kubernetes distribution itself. Most distributions use the RuntimeDefault profile provided by the container runtime, but the actual system call restrictions may differ slightly based on the runtime’s configuration. Most container runtimes provide a sane set of default syscalls that are allowed or not.
 

@@ -113,22 +113,11 @@ By default, our `example-frontend` application uses an SQLite memory database.
 
 However, this can be changed by defining the following environment variable to use the newly created MariaDB database:
 
-{{% onlyWhenNot sbb %}}
-
 ```
 #MYSQL_URI=mysql://<user>:<password>@<host>/<database>
 MYSQL_URI=mysql://acend_user:mysqlpassword@mariadb/acend_exampledb
 ```
 
-{{% /onlyWhenNot %}}
-{{% onlyWhen sbb %}}
-
-```
-#SPRING_DATASOURCE_URL=jdbc:mysql://<host>/<database>
-SPRING_DATASOURCE_URL=jdbc:mysql://mariadb/acend_exampledb
-```
-
-{{% /onlyWhen %}}
 
 The connection string our `example-frontend` application uses to connect to our new MariaDB, is a concatenated string from the values of the `mariadb` Secret.
 
