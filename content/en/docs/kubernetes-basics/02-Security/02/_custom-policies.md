@@ -12,6 +12,8 @@ Kyverno is an open-source policy engine designed specifically for Kubernetes. It
 
 Remember when we did patch the namespace <namespace> in a previous lab. Patching and allowing the users to change labels can have real security consequences because it allows users to change the behaviour of algorithms like network policies which use labels to filter out resources. This is why a Policy was set in place that you could only change certain labels of the <namespace> namespace.
 
+### {{% task %}} Apply a policy
+
 Let us create our own policy for our namespace, we want to start soft and warn users if they did not add the requirement that a container must drop `ALL` capabilites.
 Kyvernos has a so called Custom Resourced called policy for that, crate a file named `drop-policy.yaml` whith this content:
 
