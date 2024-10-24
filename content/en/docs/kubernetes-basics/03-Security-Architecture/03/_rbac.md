@@ -1,13 +1,13 @@
 ---
 title: "RBAC"
-weight: 7
-sectionnumber: 1.7
+weight: 1
+sectionnumber: 3.1
 ---
 
 
 ## Role Based Access Control
 
-Until now we just assumed that we have the necessary right to do our tasks in kubernetes. But how are users [Authenticated](https://kubernetes.io/docs/reference/access-authn-authz/authentication/) an [Authorized](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) in Kubernetes/the Kubernetes API?
+Until now we just assumed that we have the necessary right to do our tasks in kubernetes. But how are users [Authenticated](https://kubernetes.io/docs/reference/access-authn-authz/authentication/) and [Authorized](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) in Kubernetes/the Kubernetes API?
 
 ### Users in Kubernetes
 
@@ -16,7 +16,7 @@ All Kubernetes clusters have two categories of users: service accounts managed b
 It is assumed that a cluster-independent service manages normal users in the following ways:
 
 * an administrator distributing private keys
-* a user store like Keystone or Google Accounts
+* a user store like Keystore or Google Accounts
 * a file with a list of usernames and passwords
 
 In this regard, Kubernetes does not have objects which represent normal user accounts. Normal users cannot be added to a cluster through an API call.
@@ -73,7 +73,7 @@ kubectl get serviceaccount
 Next, we will create a pod that uses the newly created <namespace>-sa service account.
 
 ```bash
-kubectl run kubectl-pod --image=bitnami/kubectl --restart=Never --serviceaccount=<namespace>-sa -- sleep infinity
+kubectl run kubectl-pod --image=bitnami/kubectl --restart=Never --overrides='{ "spec": { "serviceAccount": "<namespace>-sa" }}' -- sleep infinity
 ```
 
 We are ready to use kubectl from within our pod to list all pods in the namespace using the `<namespace>-sa` service account:

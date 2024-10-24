@@ -227,44 +227,6 @@ Then use:
 to apply the changes.
 
 {{% /onlyWhenNot %}}
-{{% onlyWhen sbb %}}
-Add the environment variables by directly editing the Deployment:
-
-```bash
-{{% param cliToolName %}} edit deployment example-frontend --namespace <namespace>
-```
-
-```yaml
-      ...
-      containers:
-      - image: {{% param "containerImages.training-image-url" %}}
-        imagePullPolicy: Always
-        name: example-frontend
-        ...
-        env:
-        - name: SPRING_DATASOURCE_DATABASE_NAME
-          valueFrom:
-            secretKeyRef:
-              key: database-name
-              name: mariadb
-        - name: SPRING_DATASOURCE_USERNAME
-          valueFrom:
-            secretKeyRef:
-              key: database-user
-              name: mariadb
-        - name: SPRING_DATASOURCE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              key: database-password
-              name: mariadb
-        - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
-          value: com.mysql.cj.jdbc.Driver
-        - name: SPRING_DATASOURCE_URL
-          value: jdbc:mysql://mariadb/$(SPRING_DATASOURCE_DATABASE_NAME)?autoReconnect=true
-        ...
-```
-
-{{% /onlyWhen %}}
 
 The environment can also be checked with the `set env` command and the `--list` parameter:
 
@@ -308,32 +270,18 @@ Show all Pods:
 Which gives you an output similar to this:
 
 ```
-NAME                                  READY   STATUS      RESTARTS   AGE
-example-frontend-574544fd68-qfkcm      1/1     Running     0          2m20s
-mariadb-f845ccdb7-hf2x5               1/1     Running     0          31m
-mariadb-1-deploy                      0/1     Completed   0          11m
+example-frontend-9654cf667-2z5cr   1/1     Running   0          3m18s
+example-frontend-9654cf667-q68tk   1/1     Running   0          3m48s
+mariadb-559d6564f4-hs7vj           1/1     Running   0          49m
 ```
 
 Log into the MariaDB Pod:
 
-{{% alert title="Note" color="info" %}}
-As mentioned in {{<link "troubleshooting">}}, remember to append the command with `winpty` if you're using Git Bash on Windows.
-{{% /alert %}}
-
-{{% onlyWhenNot openshift %}}
 
 ```bash
 kubectl exec -it deployments/mariadb --namespace <namespace> -- /bin/bash
 ```
 
-{{% /onlyWhenNot %}}
-{{% onlyWhen openshift %}}
-
-```bash
-oc rsh --namespace <namespace> <mariadb-pod-name>
-```
-
-{{% /onlyWhen %}}
 
 You are now able to connect to the database and display the data. Login with:
 
@@ -365,6 +313,19 @@ Show any entered "Hellos" with:
 ```bash
 select * from hello;
 ```
+You can exit the DB and the container now:
+
+For the DB:
+
+```bash
+exit
+```
+
+And for the container
+
+```bash
+exit
+```
 
 ## {{% task %}} Optional Lab: Import a database dump
 
@@ -395,17 +356,10 @@ This is how you log into the MariaDB Pod:
 {{% onlyWhenNot openshift %}}
 
 ```bash
-kubectl exec -it <podname> --namespace <namespace> -- /bin/bash
+kubectl exec -it <podname> --namespace <namespace> -- /bin/sh
 ```
 
 {{% /onlyWhenNot %}}
-{{% onlyWhen openshift %}}
-
-```bash
-oc rsh --namespace <namespace> <podname>
-```
-
-{{% /onlyWhen %}}
 
 This command shows how to drop the whole database:
 
@@ -427,20 +381,6 @@ mariadb -u$MYSQL_USER -p$MYSQL_PASSWORD -h$MARIADB_SERVICE_HOST $MYSQL_DATABASE 
 
 Check your app to see the imported "Hellos".
 
-{{% onlyWhen openshift %}}
-
-{{% alert title="Note" color="info" %}}
-You can find your app URL by looking at your route:
-
-```bash
-{{% param cliToolName %}} get {{% onlyWhenNot openshift %}}ingress{{% /onlyWhen %}}{{% onlyWhen openshift %}}route{{% /onlyWhen %}} --namespace <namespace>
-```
-
-{{% /alert %}}
-{{% /onlyWhen %}}
-
-{{% onlyWhenNot openshift %}}
-
 {{% alert title="Note" color="info" %}}
 You can find your app URL by looking at your ingress:
 
@@ -449,25 +389,14 @@ kubectl get ingress --namespace <namespace>
 ```
 
 {{% /alert %}}
-{{% /onlyWhenNot %}}
 
 {{% alert title="Note" color="info" %}}
 A database dump can be created as follows:
 
-{{% onlyWhenNot openshift %}}
 
 ```bash
 kubectl exec -it <podname> --namespace <namespace> -- /bin/bash
 ```
-
-{{% /onlyWhenNot %}}
-{{% onlyWhen openshift %}}
-
-```bash
-oc rsh --namespace <namespace> <podname>
-```
-
-{{% /onlyWhen %}}
 
 ```bash
 mysqldump --user=$MYSQL_USER --password=$MYSQL_PASSWORD -h$MARIADB_SERVICE_HOST $MYSQL_DATABASE > /tmp/dump.sql
@@ -478,3 +407,16 @@ mysqldump --user=$MYSQL_USER --password=$MYSQL_PASSWORD -h$MARIADB_SERVICE_HOST 
 ```
 
 {{% /alert %}}
+
+Ok, you can exit the DB and container now
+
+```bash
+exit;
+```
+
+and again
+
+```bash
+exit
+```
+

@@ -1,7 +1,7 @@
 ---
 title: "Architecture and encryption"
-weight: 21
-sectionnumber: 2.1
+weight: 2
+sectionnumber: 3.2
 ---
 
 In order to secure Kubernetes we want to understand its different components. For that we install a minimal kubernetes ourselves:
@@ -12,8 +12,16 @@ For this task we need to switch to a VM, there we will install a Kubernetes Clus
 
 SSH into your VM, you can find the relevant IP in the file `welcome`
 
+```
+ssh -i /home/project/id-ecdsa <namespace>@159.69.155.196
+```
+
+Now download `kind`:
+
 ```bash
-ssh 192.168.66.66
+curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.24.0/kind-linux-amd64
+chmod +x ./kind
+sudo mv ./kind /usr/local/bin/kind
 ```
 
 Similiar to kubernetes kind can be configured using a yaml resource, execute the command below to create the file `cluster.yaml`:
@@ -197,7 +205,7 @@ We add the necessary flag using `sed` inplace editing
 #check the file
 cat /etc/kubernetes/manifests/kube-apiserver.yaml
 #edit it
-sed -i '/- kube-apiserver/a\    - --encryption-provider-config=/etc/kubernetes/encryption-config.yaml' /etc/kubernetes/manifests/kube-apiserver.yaml
+sed -i '/- kube-apiserver/a\    - --encryption-provider-config=/etc/kubernetes/pki/encryption-config.yaml' /etc/kubernetes/manifests/kube-apiserver.yaml
 #check the difference
 cat /etc/kubernetes/manifests/kube-apiserver.yaml
 ```

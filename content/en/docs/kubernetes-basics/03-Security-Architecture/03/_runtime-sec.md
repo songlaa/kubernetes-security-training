@@ -1,7 +1,7 @@
 ---
 title: "Runtime Security"
-weight: 23
-sectionnumber: 2.3
+weight: 5
+sectionnumber: 3.5
 ---
 
 Kubernetes clusters are dynamic, with workloads constantly being scheduled, modified, and removed. While static security measures (e.g., image scanning, Pod Security Policies) focus on vulnerabilities before deployment, runtime security tools like Falco detect threats as they occur.

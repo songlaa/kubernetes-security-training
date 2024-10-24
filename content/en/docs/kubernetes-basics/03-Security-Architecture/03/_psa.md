@@ -1,7 +1,7 @@
 ---
 title: "PSA"
-weight: 8
-sectionnumber: 1.8
+weight: 3
+sectionnumber: 3.3
 ---
 
 
@@ -27,11 +27,11 @@ To ensure that your workloads adhere to the Restricted security profile, you can
 * **audit** Policy violations will trigger the addition of an audit annotation to the event recorded in the audit log, but are otherwise allowed.
 * **warn** Policy violations will trigger a user-facing warning, but are otherwise allowed.
 
-To enforce the Restricted profile set the appropriate labels on the namespace.
+To warn for uncompliant pod in regards to the the Restricted profile set the appropriate labels on the namespace.
 
 ```bash
 kubectl label namespace <namespace> \
-    pod-security.kubernetes.io/enforce=restricted \
+    pod-security.kubernetes.io/warn=restricted \
     pod-security.kubernetes.io/enforce-version=latest
 
 ```

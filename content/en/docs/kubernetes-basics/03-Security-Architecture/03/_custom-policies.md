@@ -1,7 +1,7 @@
 ---
 title: "Custom Policies"
-weight: 22
-sectionnumber: 2.2
+weight: 4
+sectionnumber: 3.4
 ---
 
 Until now we learned best practices on how to secure our workload in kubernetes, but as a cluster admin. How can we enforce certain regulations for resources in our cluster? Sometimes we need to be more specific than the 3 PSP this is where policy engines like [Open Policy Agent (OPA)](https://www.openpolicyagent.org/) or [Kyverno](https://kyverno.io/) come into play.
@@ -11,6 +11,28 @@ Until now we learned best practices on how to secure our workload in kubernetes,
 Kyverno is an open-source policy engine designed specifically for Kubernetes. It allows you to manage and enforce security and compliance policies for your Kubernetes resources using custom resource definitions (CRDs). We use it to write our own Policies as Code.
 
 Remember when we did patch the namespace <namespace> in a previous lab. Patching and allowing the users to change labels can have real security consequences because it allows users to change the behaviour of algorithms like network policies which use labels to filter out resources. This is why a Policy was set in place that you could only change certain labels of the <namespace> namespace.
+
+### {{% task %}} Install Kyverno on our kind cluster
+
+We will install a standalone version of Kyverno on our `kind` cluster using helm to test out its functionality:
+
+```bash
+helm repo add kyverno https://kyverno.github.io/kyverno/
+helm repo update
+helm install kyverno kyverno/kyverno -n kyverno --create-namespace
+ ```
+
+We see that a new Webhook was created which calls Kyverno on CREATE and UPDATE operations:
+
+```bash
+kubectl get validatingwebhookconfigurations.admissionregistration.k8s.io kyverno-policy-validating-webhook-cfg -oyaml
+```
+
+Kyverno itself runs in the `kyverno` namespace:
+
+```bash
+kubectl get deployments.apps -n kyverno
+```
 
 ### {{% task %}} Apply a policy
 

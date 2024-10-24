@@ -1,7 +1,7 @@
 ---
 title: "Network Policies"
-weight: 6
-sectionnumber: 1.6
+weight: 2
+sectionnumber: 2.2
 ---
 
 
@@ -17,7 +17,7 @@ One CNI function is the ability to enforce network policies and implement an in-
 
 ### {{% task %}} Deploy a second frontend/backend application
 
-First we need a simple application to show the effects on Kubernetes network policies. Let's have a look at the following resource definitions:
+First we need a simple application to show the effects on Kubernetes network policies. Create a file named `simple-app.yaml` with this content:
 
 ```yaml
 apiVersion: apps/v1
@@ -127,7 +127,7 @@ service/backend created
 Verify with the following command that everything is up and running:
 
 ```bash
-kubectl deployment,svc
+kubectl get deployment,svc
 ```
 
 Let us make life a bit easier by storing the pods name into an environment variable so we can reuse it later again:
@@ -360,7 +360,7 @@ backend-ingress-deny             app=backend    12m
 
 Network policies are additive. Just like with firewalls, it is thus a good idea to have default DENY policies and then add more specific ALLOW policies as needed.
 
-Let us apply our new knowledge again to our original example frontend/backend application. But before the just created objects:
+Let us apply our new knowledge again to our original example frontend/backend application. But first delete this example:
 
 ```bash
 kubectl delete netpol backend-allow-ingress-frontend, backend-ingress-deny 
@@ -372,7 +372,7 @@ kubectl delete -f simple-app.yaml
 
 As previously mentioned it is a good practice to start with a default DENY rule and only add the traffic we want to allow.
 
-This two policies will allow in-cluster DNS and deny all inbound and outbound traffic in the namespace by default. Create a file named `deny-netpol.yaml`.
+This two policies will allow in-cluster DNS and deny all inbound and outbound traffic in the namespace by default, furthermore we still allow traffic to our own webshell. Create a file named `deny-netpol.yaml`.
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -406,18 +406,42 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-webshellkube
+spec:
+  podSelector:
+    matchLabels:
+     "app.kubernetes.io/name": webshell
+  policyTypes:
+    - Ingress
+    - Egress
+  egress:
+  - {}
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          app: ingress-haproxy
 ```
 
-Now we have broken the communication from our front- to the backend. [https://example-frontend-><namespace>.<appdomain>/](https://example-frontend-><namespace>.<appdomain>/) should give you an error now.
+And apply it
 
-Finally create the network policy for the communiction from front- to backend:
+```bash
+kubectl apply -f deny-netpol.yaml
+```
+
+Now we have broken the communication from our front- to the backend. [https://example-frontend-><namespace>.<appdomain>/](http://example-frontend-<namespace>.<appdomain>) should give you an error now.
+
+Finally create the network policies necessary for the communiction from front- to backend and to reach the frontend. Create a file named `frontend-netpol.yaml`:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: frontend-to-backend
-  namespace: your-namespace
+  name: backend-allow-frontend
 spec:
   podSelector:
     matchLabels:
@@ -427,9 +451,37 @@ spec:
         - podSelector:
             matchLabels:
               app: example-frontend
+          namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: <namespace>
       ports:
         - protocol: TCP
           port: 3306
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: frontend-to-backend
+spec:
+  podSelector:
+    matchLabels:
+      app: example-frontend
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: <namespace>
+          podSelector:
+            matchLabels:
+              app: mariadb
+  ingress:
+  - {}
+```
+
+And apply it:
+
+```bash
+kubectl apply -f frontend-netpol.yaml
 ```
 
 Try out if your app is still working, refresh the [https://example-frontend-<namespace>.<appdomain>/](https://example-frontend-<namespace>.<appdomain>/) in your browser and check if it is working again.

@@ -1,7 +1,7 @@
 ---
 title: "Securing the frontend"
-weight: 5
-sectionnumber: 1.5
+weight: 1
+sectionnumber: 2.1
 ---
 
 Right now we have a fully functioning application, but we wan't to run it a secure as possible. In docker we would make sure to run as an unprivileged user, drop unnecessary capabilites and use a Mandatory Access Control System like AppArmor. Let us apply that to Kubernetes!
@@ -52,13 +52,27 @@ kubectl exec -it security-context-demo --namespace <namespace> -- sh
 
 In the container run 'ps' to get a list of all running processes. The output shows, that the processes are running with the user 1000, which is the value from 'runAsUser':
 
+```bash
+ps
+```
+
+This should display something like this:
+
 ```
 PID   USER     TIME  COMMAND
     1 1000      0:00 sleep 1h
-    6 1000      0:00 sh
+    7 1000      0:00 sh
+   13 1000      0:00 ps
 ```
 
-Now navigate to the directory '/data' and list the content. As you can see the 'emptyDir' has been mounted with the group ID of 2000, which is the value of the 'fsGroup' field.
+Now navigate to the directory '/data' and list the content.
+
+```bash
+cd /data
+ls -l
+```
+
+As you can see the 'emptyDir' has been mounted with the group ID of 2000, which is the value of the 'fsGroup' field.
 
 ```
 drwxrwsrwx 2 root 2000 4096 Oct  20 20:10 demo
@@ -71,9 +85,17 @@ cd demo
 echo hello > demofile
 ```
 
-List the content with 'ls' again and see, that 'demofile' has the group ID 2000, which is the value 'fsGroup' as well.
+List the content with 'ls -l' again and see, that 'demofile' has the group ID 2000, which is the value 'fsGroup' as well.
 
-Run the last command 'id' here and check the output:
+```bash
+ls -l 
+```
+
+At last run 'id' here and check the output:
+
+```bash
+id
+```
 
 ```
 uid=1000 gid=3000 groups=2000
@@ -81,11 +103,13 @@ uid=1000 gid=3000 groups=2000
 
 The shown group ID of the user is 3000, from the field 'runAsGroup'. If the field would be empty the user would have 0 (root) and every process would be able to go with files which are owned by the root (0) group.
 
-```
+Time to exit:
+
+```bash
 exit
 ```
 
-You can delete the pod now:
+...and discard the pod:
 
 ```bash
 kubectl delete pod security-context-demo --namespace <namespace>

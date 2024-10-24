@@ -49,7 +49,7 @@ pod/awesome-app created
 Use kubectl get pods --namespace <namespace>` in order to show the running Pod:
 
 ```bash
-kubectl get pods --namespace <namespace>
+kubectl get pod awesome-app --namespace <namespace>
 ```
 
 Which gives you an output similar to this:

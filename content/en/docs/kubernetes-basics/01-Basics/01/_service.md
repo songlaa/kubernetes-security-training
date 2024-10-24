@@ -101,10 +101,6 @@ status:
 
 The Service's `selector` defines which Pods are being used as Endpoints. This happens based on labels. Look at the configuration of Service and Pod in order to find out what maps to what:
 
-```bash
-kubectl get service example-frontend -o yaml --namespace <namespace>
-```
-
 ```
 ...
   selector:
@@ -176,54 +172,7 @@ kubectl apply -f ing-example-frontend.yaml --namespace <namespace>
 
 Afterwards, we are able to access our freshly created Ingress at `http://example-frontend-<namespace>.<appdomain>`
 
-{{% onlyWhen openshift %}}
-{{% onlyWhenNot baloise %}}
-
-```bash
-oc expose service example-frontend --namespace <namespace>
-```
-
-The output should be:
-
-```
-route.route.openshift.io/example-frontend exposed
-```
-
-We are now able to access our app via the freshly created route at `http://example-frontend-<namespace>.<appdomain>`
-
-{{% /onlyWhenNot %}}
-{{% onlyWhen baloise %}}
-
-```bash
-oc create route edge example-frontend --service example-frontend --namespace <namespace>
-```
-
-The output should be:
-
-```
-route.route.openshift.io/example-frontend created
-```
-
-We are now able to access our app via the freshly created route at `https://example-frontend-<namespace>.<appdomain>`
-
-{{% /onlyWhen %}}
-
-Find your actual app URL by looking at your route (HOST/PORT):
-
-```bash
-oc get route --namespace <namespace>
-```
-
-Browse to the URL and check the output of your app.
-{{% alert title="Note" color="info" %}}
-If the site doesn't load, check if you are using the http:// , not the https:// protocol, which might be the default in your browser.
-{{% /alert %}}
-
-{{% /onlyWhen %}}
-
-{{% onlyWhenNot openshift %}}
-
-## {{% task %}} Expose as NodePort
+## {{% task %}} (Optional) Expose as NodePort
 
 {{% alert title="Note" color="info" %}}
 This is an advanced lab, so feel free to skip this. NodePorts are usually not used for http-based applications as we use the layer 7-based Ingress resource. Only for non-http based applications, a NodePort might be a suitable alternative.
@@ -231,7 +180,7 @@ This is an advanced lab, so feel free to skip this. NodePorts are usually not us
 
 There's a second option to make a Service accessible from outside: Use a [NodePort](https://kubernetes.io/docs/concepts/services-networking/service/#nodeport).
 
-In order to switch the Service type, change the existing `ClusterIP` Service by updating our Service definition in file `svc-frontend.yaml`to:
+In order to add a new Service type, create a new Service definition in file `svc-frontend-nodeport.yaml`:
 
 ```yaml
 apiVersion: v1
@@ -239,7 +188,7 @@ kind: Service
 metadata:
   labels:
     app: example-frontend
-  name: example-frontend
+  name: example-frontend-nodeport
 spec:
   ports:
   - port: 5000
@@ -251,23 +200,26 @@ spec:
 
 ```
 
+Note the changed sections `type: Nodeport` and the `ports` section.
+
 And then apply again with:
 
 ```bash
-kubectl apply -f svc-frontend.yaml --namespace <namespace>
+kubectl apply -f svc-frontend-nodeport.yaml --namespace <namespace>
 ```
 
 Let's have a more detailed look at our new `NodePort` Service:
 
 ```bash
-kubectl get services --namespace <namespace>
+kubectl get services -l app=example-frontend --namespace <namespace>
 ```
 
 Which gives you an output similar to this:
 
 ```bash
-NAME             TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
-example-frontend   NodePort   10.43.91.62   <none>        5000:30692/TCP
+NAME                        TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
+example-frontend-nodeport   ClusterIP  10.43.91.62   <none>        5000/TCP
+example-frontend            NodePort   10.43.91.62   <none>        5000:30692/TCP
 ```
 
 The `NodePort` number is assigned by Kubernetes and stays the same as long as the Service is not deleted. A NodePort Service is more suitable for infrastructure tools than for public URLs.
@@ -287,8 +239,6 @@ lab-1   Ready    controlplane,etcd,worker   150m   v1.17.4   5.102.145.142   <no
 lab-2   Ready    controlplane,etcd,worker   150m   v1.17.4   5.102.145.77    <none>        Ubuntu 18.04.3 LTS   4.15.0-66-generic   docker://19.3.8
 lab-3   Ready    controlplane,etcd,worker   150m   v1.17.4   5.102.145.148   <none>        Ubuntu 18.04.3 LTS   4.15.0-66-generic   docker://19.3.8
 ```
-
-{{% /onlyWhenNot %}}
 
 ## {{% task %}} For fast learners
 

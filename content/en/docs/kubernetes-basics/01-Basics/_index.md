@@ -1,5 +1,5 @@
 ---
-title: "1. Basics"
+title: "Basics"
 weight: 10
 ---
 
