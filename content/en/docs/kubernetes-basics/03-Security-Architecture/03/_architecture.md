@@ -30,6 +30,8 @@ Similiar to kubernetes kind can be configured using a yaml resource, execute the
 cat <<EOF >> cluster.yaml
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
+featureGates:
+  PodSecurity: true
 nodes:
 - role: control-plane
 - role: worker
@@ -212,7 +214,7 @@ cat /etc/kubernetes/manifests/kube-apiserver.yaml
 
 Kubernetes will automatically restart the kube-apiserver since it's running as a static pod.
 
-Recreate the secret to ensure it is encrypted (you need to )
+Recreate the secret to ensure it is encrypted (you need to open a new terminal and connect to the VM again)
 
 ```bash
 kubectl get secret my-secret -n default -o yaml | kubectl apply -f -
@@ -222,6 +224,12 @@ Now check if you can still read the secret:
 
 ```bash
 etcdctl get /registry/secrets/default/my-secret --print-value-only
+```
+
+You should only see binary data now. Don't forget to exit the container.
+
+```bash
+exit
 ```
 
 Encrypting secret data with a locally managed key protects against an etcd compromise, but it fails to protect against a host compromise.

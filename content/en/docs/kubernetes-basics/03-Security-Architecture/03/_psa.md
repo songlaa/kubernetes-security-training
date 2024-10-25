@@ -27,13 +27,19 @@ To ensure that your workloads adhere to the Restricted security profile, you can
 * **audit** Policy violations will trigger the addition of an audit annotation to the event recorded in the audit log, but are otherwise allowed.
 * **warn** Policy violations will trigger a user-facing warning, but are otherwise allowed.
 
-To warn for uncompliant pod in regards to the the Restricted profile set the appropriate labels on the namespace.
+We will enforce the restricted policy on the `default` namespace:
 
 ```bash
-kubectl label namespace <namespace> \
+kubectl label namespace default\
     pod-security.kubernetes.io/warn=restricted \
     pod-security.kubernetes.io/enforce-version=latest
 
+```
+
+Test the policy by starting a privileged pod:
+
+```bash
+ kubectl run --rm -i --tty busybox --image=busybox --restart=Never --overrides='{"spec": {"template": {"spec": {"containers": [{"securityContext": {"privileged": true} }]}}}}' -- whoami
 ```
 
 This ensures future pods in this namespace will meet the criteria set in the Restricted profile. You can monitor metrics for this using exernal tools like prometheus or directly with

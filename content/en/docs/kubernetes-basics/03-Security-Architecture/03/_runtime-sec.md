@@ -43,28 +43,22 @@ kubectl wait pods --for=condition=Ready --all -n falco
 
 Falco comes with a [pre-installed set of rules](https://github.com/falcosecurity/rules/blob/main/rules/falco_rules.yaml) that alert you upon suspicious behavior. We can check this by triggering such a rule
 
-Let's create a deployment:
+One of this default rule is a log entry everytime a shell is opened in a pod, let us do that:
 
 ```bash
-kubectl create deployment nginx --image=nginx
-```
-
-And execute a command that would trigger a rule:
-
-```bash
-kubectl exec -it $(kubectl get pods --selector=app=nginx -o name) -- cat /etc/shadow
+kubectl exec -it -n test-kyverno alpine-pod -- sh 
 ```
 
 Now let's take a look at the Falco logs:
 
 ```bash
-kubectl logs -l app.kubernetes.io/name=falco -n falco -c falco | grep Warning
+kubectl logs -l app.kubernetes.io/name=falco -n falco -c falco | grep "shell was spawned"
 ```
 
-You will see logs for all the Falco pods deployed on the system. The Falco pod corresponding to the node in which our nginx deployment is running has detected the event, and you'll be able to read a line like:
+You will see logs for all the Falco pods deployed on the system. The Falco pod corresponding to the node in which our `alpine-pod` is running has detected the event, and you'll be able to read a line like:
 
 ```
-09:46:05.727801343: Warning Sensitive file opened for reading by non-trusted program (file=/etc/shadow gparent=systemd ggparent=<NA> gggparent=<NA> evt_type=openat user=root user_uid=0 user_loginuid=-1 process=cat proc_exepath=/usr/bin/cat parent=containerd-shim command=cat /etc/shadow terminal=34816 container_id=bf74f1749e23 container_image=docker.io/library/nginx container_image_tag=latest container_name=nginx k8s_ns=default k8s_pod_name=nginx-7854ff8877-h97p4)
+09:13:33.058953225: Notice A shell was spawned in a container with an attached terminal (evt_type=execve user=root user_uid=1000 user_loginuid=-1 process=sh proc_exepath=/bin/busybox parent=containerd-shim command=sh terminal=34816 exe_flags=EXE_LOWER_LAYER container_id=198e59c8bb67 container_image=docker.io/library/alpine container_image_tag=latest container_name=alpine k8s_ns=test-kyverno k8s_pod_name=alpine-pod)
 ```
 
 We could forward the logs of the falco deamonset to a central instance and alert on certain events there.
@@ -83,28 +77,41 @@ kind: Pod
 metadata:
   name: nginx-tls-pod
 spec:
+  securityContext:
+    seccompProfile:
+      type: RuntimeDefault
   containers:
-  - name: nginx
-    image: nginx
-    ports:
-    - containerPort: 443
-    volumeMounts:
-    - name: tls-cert
-      mountPath: "/etc/nginx/tls"
-      readOnly: true
+    - name: nginx
+      image: bitnami/nginx
+      ports:
+        - containerPort: 8443
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: false
+        runAsNonRoot: true
+        runAsUser: 101
+        capabilities:
+          drop: ["ALL"]
+        seccompProfile:
+          type: RuntimeDefault
+      volumeMounts:
+        - name: tls-cert
+          mountPath: "/etc/nginx/tls"
+          readOnly: true
   volumes:
-  - name: tls-cert
-    secret:
-      secretName: nginx-tls
+    - name: tls-cert
+      secret:
+        secretName: nginx-tls
 EOF
 kubectl apply -f secret-mount-pod.yaml
 ```
 
-You created a webserver wich uses a certificate from a secret to encrypt its communication.Now, let’s create a Falco rule that triggers an alert if any process other than nginx accesses the mounted secret files (the certificate and private key).
+You created a webserver wich uses a certificate from a secret to encrypt its communication. Now, let’s create a Falco rule that triggers an alert if any process other than nginx accesses the mounted secret files (the certificate and private key).
 
 Create a yaml named `falco_custom_rules_cm.yaml` with your custom rule:
 
 ```yaml
+cat << \EOF >> falco_custom_rules_cm.yaml
 customRules:
   custom-rules.yaml: |-
     - rule: Unauthorized Access to Nginx TLS Secrets
@@ -113,6 +120,7 @@ customRules:
       output: "Unauthorized access to TLS secret by process other than nginx (user=%user.name command=%proc.cmdline file=%fd.name container=%container.name)"
       priority: WARNING
       tags: [kubernetes, secrets, tls, nginx]
+EOF
 ```
 
 This rule triggers on any read access (open_read) to files under /etc/nginx/tls (where the TLS cert and key are mounted).
