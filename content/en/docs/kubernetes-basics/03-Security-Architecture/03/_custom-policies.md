@@ -4,13 +4,13 @@ weight: 4
 sectionnumber: 3.4
 ---
 
-Until now we learned best practices on how to secure our workload in kubernetes, but as a cluster admin. How can we enforce certain regulations for resources in our cluster? Sometimes we need to be more specific than the 3 PSP this is where policy engines like [Open Policy Agent (OPA)](https://www.openpolicyagent.org/) or [Kyverno](https://kyverno.io/) come into play.
+Until now we learned best practices on how to secure our workload in Kubernetes, but as a cluster admin. How can we enforce certain regulations for resources in our cluster? Sometimes we need to be more specific than the 3 PSP this is where policy engines like [Open Policy Agent (OPA)](https://www.openpolicyagent.org/) or [Kyverno](https://kyverno.io/) come into play.
 
 ## Kyverno
 
 Kyverno is an open-source policy engine designed specifically for Kubernetes. It allows you to manage and enforce security and compliance policies for your Kubernetes resources using custom resource definitions (CRDs). We use it to write our own Policies as Code.
 
-Remember when we did patch a in a previous lab. Patching and allowing the users to change labels can have real security consequences because it allows users to change the behaviour of algorithms like network policies which use labels to filter out resources. This is why a Policy was set in place that you could only change certain labels of a namespace.
+Remember when we did patch a namespace in a previous lab. Patching and allowing the users to change labels can have real security consequences because it allows users to change the behavior of algorithms like network policies which use labels to filter out resources. This is why a Policy was set in place that you could only change certain labels of a namespace.
 
 ### {{% task %}} Install Kyverno on our kind cluster
 
@@ -36,7 +36,7 @@ kubectl get deployments.apps -n kyverno
 
 ### {{% task %}} Apply a policy
 
-Let us create a namespace called `test-kyverno` and apply our own policy for this namespace, we want to start soft and warn users if they did not add the requirement that a container must drop `ALL` capabilites.
+Let us create a namespace called `test-kyverno` and apply our own policy for this namespace, we want to start soft and warn users if they did not add the requirement that a container must drop `ALL` capabilities.
 
 Create the namespace first:
 
@@ -76,9 +76,9 @@ kubectl apply -f alpine-pod.yaml
 
 We see this works.
 
-The baseline does not monitor if file-systems are mounted `read-only` but the `restricted` profile not flexibel enough. Let us apply a Kyverno policy for that
+The baseline does not monitor if file systems are mounted `read-only` but the `restricted` profile is not flexibel enough. Let us apply a Kyverno policy for that.
 
-Kyvernos has a so called Custom Resourced called policy for that, create a file named `read-only.yaml` whith this content:
+Kyvernos has a so called Custom Resourced called policy for that, create a file named `read-only.yaml` with this content:
 
 ```yaml
 cat <<\EOF >> read-only.yaml
@@ -118,20 +118,31 @@ Apply the policy now
 kubectl apply -f read-only.yaml
 ```
 
-Now let us delete and rerun the pod
+Now let us delete, edit and rerun the pod
 
 ```bash
 kubectl delete -f alpine-pod.yaml
+```
+
+Switch `readOnlyRootFilesystem` to false.
+
+```bash
+nano alpine-pod.yaml
+```
+
+And then apply the pod again:
+
+```bash
 kubectl apply -f alpine-pod.yaml
 ```
 
-Because the Action is only set to `Audit` non compliant resources are only logged, check here:
+Because the Action is only set to `Audit` noncompliant resources are only logged, check here:
 
 ```bash
 kubectl -n test-kyverno describe policies.kyverno.io enforce-readonly-filesystem
 ```
 
-Let us now enforce our policy, swich the `Audit` to `Enforce` in `drop-policy.yaml` and apply it again:
+Let us now enforce our policy, switch the `Audit` to `Enforce` in `drop-policy.yaml` and apply it again:
 
 ```bash
 nano read-only.yaml
@@ -145,4 +156,11 @@ kubectl delete -f alpine-pod.yaml
 kubectl apply -f alpine-pod.yaml
 ```
 
-We were successfull in implementing and enforcing our policy for newly started pods.
+We were successful in implementing and enforcing our policy for newly started pods. We still need this pod running so change it back to a working mode:
+
+Let us now enforce our policy, switch the `Audit` to `Enforce` in `drop-policy.yaml` and apply it again:
+
+```bash
+nano alpine-pod.yaml
+kubectl apply -f alpine-pod.yaml
+```

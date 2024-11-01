@@ -4,7 +4,7 @@ weight: 1
 sectionnumber: 2.1
 ---
 
-Right now we have a fully functioning application, but we wan't to run it a secure as possible. In docker we would make sure to run as an unprivileged user, drop unnecessary capabilites and use a Mandatory Access Control System like AppArmor. Let us apply that to Kubernetes!
+Right now we have a fully functioning application, but we want to run it as securely as possible. In Docker, we would make sure to run as an unprivileged user, drop unnecessary capabilities and use a Mandatory Access Control System like AppArmor. Let us apply that to Kubernetes!
 
 In Kubernetes, the SecurityContext defines security-related settings for both Pods and individual Containers. It allows you to control various security aspects of your workloads, such as user permissions, capabilities, and Linux security features (like SELinux, AppArmor, and seccomp).
 
@@ -101,7 +101,7 @@ id
 uid=1000 gid=3000 groups=2000
 ```
 
-The shown group ID of the user is 3000, from the field 'runAsGroup'. If the field would be empty the user would have 0 (root) and every process would be able to go with files which are owned by the root (0) group.
+The shown group ID of the user is 3000, from the field 'runAsGroup'. If the field is empty the user would have 0 (root) and every process would be able to go with files that are owned by the root (0) group.
 
 Time to exit:
 
@@ -119,7 +119,7 @@ We are ready to apply some of this new knowledge to our frontend deployment now:
 
 ## {{% task %}} A more secure frontend
 
-First let us check if the current frontend runs as the root user, an easy way it to execute `whoami` in the running container:
+First let us check if the current frontend runs as the root user, an easy way is to execute `whoami` in the running container:
 
 ```bash
 kubectl -n <namespace> exec deployments/example-frontend -- whoami
@@ -127,11 +127,11 @@ kubectl -n <namespace> exec deployments/example-frontend -- whoami
 
 We see that the process is running with the user `web`. We could also have checked the Dockerfile or run `docker inspect` to get the user.
 
-Now let us make sure we don't run this pod as root, even if the image would change. We can set the `runAsNonRoot` field to `true` in the securityContext. This ensures that the container will not run with root privileges. If the image being used has no specific user set, this will result in an error. For this example we don't need `runAsUser` or `runAsGroup` because the image already runs with an unprivileged user/group.
+Now let us make sure we don't run this pod as root, even if the image would change. We can set the `runAsNonRoot` field to `true` in the securityContext. This ensures that the container will not run with root privileges. If the image being used has no specific user set, this will result in an error. For this example, we don't need `runAsUser` or `runAsGroup` because the image already runs with an unprivileged user/group.
 
-We could also use `fsGroup` like in the example above. But since we don't use shated storage there is a better option: we add `readOnlyRootFilesystem` to the security context, this makes the filesystems in our container readonly.
+We could also use `fsGroup` like in the example above. But since we don't use shared storage there is a better option: we add `readOnlyRootFilesystem` to the security context, this makes the filesystems in our container read-only.
 
-Finally we drop all capabilities of the container, since we run on a port which is >1024 we even don't capabilities to open lower ports.
+Finally, we drop all capabilities of the container, since we run on a port that is >1024 we even don't need any capability to open lower ports.
 
 Change your file `deployment_example-frontend.yaml` to incorporate this securityContext:
 
@@ -194,7 +194,7 @@ Like this we can make sure that we don't run any container in our deployment as 
 
 {{% alert title="Note" color="info" %}}
 
-If you need to run as root but want the added security of user-namespaces, kubernetes has them introduced recently as beta feature. More information under <https://kubernetes.io/docs/concepts/workloads/pods/user-namespaces/>
+If you need to run as root but want the added security of user-namespaces, Kubernetes has them introduced recently as a beta feature. More information under <https://kubernetes.io/docs/concepts/workloads/pods/user-namespaces/>
 
 {{% /alert %}}
 
@@ -215,7 +215,7 @@ spec:
 
 If you have the seccompDefault configuration [enabled](https://kubernetes.io/docs/tutorials/security/seccomp/#enable-the-use-of-runtimedefault-as-the-default-seccomp-profile-for-all-workloads), then Pods use the RuntimeDefault seccomp profile whenever no other seccomp profile is specified. Otherwise, the default is Unconfined.
 
-You could also create you own seccomp profile store it on the nodes and and add it to security context of a pod like this:
+You could also create your own seccomp profile store it on the nodes and add it to security context of a pod like this:
 
 ```
         securityContext:

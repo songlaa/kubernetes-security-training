@@ -4,11 +4,11 @@ weight: 4
 sectionnumber: 1.4
 ---
 
-Numerous applications are stateful in some way and want to save data persistently, be it in a database, as files on a filesystem or in an object store. In this lab, we are going to create a MariaDB database and configure our application to store its data in it.
+Numerous applications are stateful in some way and want to save data persistently, whether in a database, as files on a filesystem, or in an object store. In this lab, we will create a MariaDB database and configure our application to store its data in it.
 
 ## {{% task %}} Instantiate a MariaDB database
 
-We are first going to create a so-called _Secret_ in which we store sensitive data. The secret will be used to access the database and also to create the initial database.
+We will first create a so-called _Secret_ in which we store sensitive data. The secret will be used to access the database and also to create the initial database.
 
 ```bash
 kubectl create secret generic mariadb \
@@ -47,9 +47,9 @@ echo "YWNlbmQtZXhhbXBsZS1kYg==" | base64 -d
 {{% alert title="Note" color="info" %}}
 By default, Secrets are not encrypted!
 
-However, [Kubernetes (1.13 and later)](https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/) offers the capability to encrypt data in etcd.
+However, [Kubernetes (1.13 and later)](https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/) offers the capability to encrypt data in `etcd`.
 
-Another option would be the use of a secrets management solution like [Vault by HashiCorp](https://www.vaultproject.io/) in conntection with the [External Secrets Operator](https://external-secrets.io/).
+Another option would be the use of a secrets management solution like [Vault by HashiCorp](https://www.vaultproject.io/) in connection with the [External Secrets Operator](https://external-secrets.io/).
 
 {{% /alert %}}
 
@@ -57,7 +57,7 @@ We are now going to create a Deployment and a Service. As a first example, we us
 
 As we had seen in the earlier labs, all resources like Deployments, Services, Secrets and so on can be displayed in YAML or JSON format. It doesn't end there, capabilities also include the creation and exportation of resources using YAML or JSON files.
 
-In our case we want to create a Deployment and Service for our MariaDB database.
+In our case, we want to create a Deployment and Service for our MariaDB database.
 Save this snippet as `mariadb.yaml`:
 
 {{< readfile file="/content/en/docs/kubernetes-basics/01-Basics/01/mariadb.yaml" code="true" lang="yaml" >}}
@@ -127,7 +127,7 @@ For the actual MariaDB host, you can either use the MariaDB Service's ClusterIP 
 The following commands set the environment variables for the deployment configuration of the `example-frontend` application:
 
 {{% alert title="Warning" color="warning" %}}
-Depending on the shell you use, the following `set env` command works but inserts too many apostrophes! Check the deployment's environment variable afterwards or directly edit it as described further down below.
+Depending on the shell you use, the following `set env` command works but inserts too many apostrophes! Check the deployment's environment variable afterward or directly edit it as described further down below.
 {{% /alert %}}
 
 ```bash
@@ -142,7 +142,7 @@ and
 
 The first command inserts the values from the Secret, the second finally uses these values to put them in the environment variable `MYSQL_URI` which the application considers.
 
-You can also do the changes by directly editing your local `deployment_example-frontend.yaml` file. Find the section which defines the containers. You should find it under:
+You can also make the changes by directly editing your local `deployment_example-frontend.yaml` file. Find the section that defines the containers. You should find it under:
 
 ```
 ...
@@ -251,7 +251,7 @@ Do not proceed with the lab before all example-frontend pods are restarted succe
 The change of the deployment definition (environment change) triggers a new rollout and all example-frontend pods will be restarted. The application will not be connected to the database until all pods are restarted successfully.
 {{% /alert %}}
 
-In order to find out if the change worked we can either look at the container's logs (`{{% param cliToolName %}} logs <pod>`) or we could register some "Hellos" in the application, delete the Pod, wait for the new Pod to be started and check if they are still there.
+To find out if the change worked we can either look at the container's logs (`{{% param cliToolName %}} logs <pod>`) or we could register some "Hellos" in the application, delete the Pod, wait for the new Pod to be started and check if they are still there.
 
 {{% alert title="Note" color="info" %}}
 This does not work if we delete the database Pod as its data is not yet persisted.
@@ -332,7 +332,7 @@ exit
 Our task is now to import this [dump.sql](https://raw.githubusercontent.com/acend/kubernetes-basics-training/main/content/en/docs/attaching-a-database/dump.sql) into the MariaDB database running as a Pod. Use the `mysql` command line utility to do this. Make sure the database is empty beforehand. You could also delete and recreate the database.
 
 {{% alert title="Note" color="info" %}}
-You can also copy local files into a Pod using `{{% param cliToolName %}} cp`. Be aware that the `tar` binary has to be present inside the container and on your operating system in order for this to work! Install `tar` on UNIX systems with e.g. your package manager, on Windows there's e.g. [cwRsync](https://www.itefix.net/cwrsync). If you cannot install `tar` on your host, there's also the possibility of logging into the Pod and using `curl -O <url>`.
+You can also copy local files into a Pod using `{{% param cliToolName %}} cp`. Be aware that the `tar` binary has to be present inside the container and on your operating system for this to work! Install `tar` on UNIX systems with e.g. your package manager, on Windows there's e.g. [cwRsync](https://www.itefix.net/cwrsync). If you cannot install `tar` on your host, there's also the possibility of logging into the Pod and using `curl -O <url>`.
 {{% /alert %}}
 
 ### Solution

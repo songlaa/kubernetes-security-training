@@ -17,7 +17,7 @@ One CNI function is the ability to enforce network policies and implement an in-
 
 ### {{% task %}} Deploy a second frontend/backend application
 
-First we need a simple application to show the effects on Kubernetes network policies. Create a file named `simple-app.yaml` with this content:
+First, we need a simple application to show the effects on Kubernetes network policies. Create a file named `simple-app.yaml` with this content:
 
 ```yaml
 apiVersion: apps/v1
@@ -130,7 +130,7 @@ Verify with the following command that everything is up and running:
 kubectl get deployment,svc
 ```
 
-Let us make life a bit easier by storing the pods name into an environment variable so we can reuse it later again:
+Let us make life a bit easier by storing the pod name into an environment variable so we can reuse it later again:
 
 ```bash
 export FRONTEND=$(kubectl get pods -l app=frontend -o jsonpath='{.items[0].metadata.name}')
@@ -153,7 +153,7 @@ and
 kubectl exec -ti ${NOT_FRONTEND} -- curl -I --connect-timeout 5 backend:8080
 ```
 
-This will execute a simple `curl` call from the `frontend` and `not-frondend` application to the `backend` application:
+This will execute a simple `curl` call from the `frontend` and `not-frontend` application to the `backend` application:
 
 ```
 # Frontend
@@ -185,7 +185,7 @@ Date: Tue, 23 Nov 2021 12:50:44 GMT
 Connection: keep-alive
 ```
 
-and we see, both applications can connect to the `backend` application.
+We see that both applications can connect to the `backend` application.
 
 Until now ingress and egress policy enforcement are still disabled on all of our pods because no network policy has been imported yet selecting any of the pods. Let us change this.
 
@@ -220,7 +220,7 @@ and you can verify the created `NetworkPolicy` with:
 kubectl get netpol
 ```
 
-which gives you an output similar to this:
+Which gives you an output similar to this:
 
 ```
                                                     
@@ -243,7 +243,7 @@ and
 kubectl exec -ti ${NOT_FRONTEND} -- curl -I --connect-timeout 5 backend:8080
 ```
 
-but this time you see that the `frontend` and `not-frontend` application cannot connect anymore to the `backend`:
+But this time you see that the `frontend` and `not-frontend` applications cannot connect anymore to the `backend`:
 
 ```
 # Frontend
@@ -256,7 +256,7 @@ command terminated with exit code 28
 
 The network policy correctly switched the default ingress behavior from default allow to default deny.
 
-Let's now selectively re-allow traffic again, but only from frontend to backend.
+Let's now selectively re-allow traffic again, but only from the frontend to the backend.
 
 ## {{% task %}} Allow traffic from frontend to backend
 
@@ -264,7 +264,7 @@ We can do it by crafting a new network policy manually, but we can also use the 
 
 ![Cilium editor with backend-ingress-deny Policy](../cilium_editor_1.png)
 
-Above you see our original policy, we create an new one with the editor now.
+Above you see our original policy, we create a new one with the editor now.
 
 * Go to <https://editor.cilium.io/>
 * Name the network policy to backend-allow-ingress-frontend (using the Edit button in the center).
@@ -372,19 +372,28 @@ kubectl delete -f simple-app.yaml
 
 As previously mentioned it is a good practice to start with a default DENY rule and only add the traffic we want to allow.
 
-This two policies will allow in-cluster DNS and deny all inbound and outbound traffic in the namespace by default, furthermore we still allow traffic to our own webshell. Create a file named `deny-netpol.yaml`.
+These two policies will allow in-cluster DNS and deny all inbound and outbound traffic in the namespace by default, furthermore, we still allow traffic to our own webshell. Create a file named `deny-netpol.yaml`.
 
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: default-deny
+  name: allow-webshellkube
 spec:
-  podSelector: {}
+  podSelector:
+    matchLabels:
+     "app.kubernetes.io/name": webshell
   policyTypes:
     - Ingress
     - Egress
----    
+  egress:
+  - {}
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          app: ingress-haproxy
+---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -406,25 +415,6 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-webshellkube
-spec:
-  podSelector:
-    matchLabels:
-     "app.kubernetes.io/name": webshell
-  policyTypes:
-    - Ingress
-    - Egress
-  egress:
-  - {}
-  ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          app: ingress-haproxy
 ```
 
 And apply it
@@ -433,9 +423,9 @@ And apply it
 kubectl apply -f deny-netpol.yaml
 ```
 
-Now we have broken the communication from our front- to the backend. [https://example-frontend-><namespace>.<appdomain>/](http://example-frontend-<namespace>.<appdomain>) should give you an error now.
+Now we have broken the communication from our front- to the backend. Check your frontend it should give you an error now.
 
-Finally create the network policies necessary for the communiction from front- to backend and to reach the frontend. Create a file named `frontend-netpol.yaml`:
+Finally, create the network policies necessary for the communication from front- to backend and to reach the frontend. Create a file named `frontend-netpol.yaml`:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -484,4 +474,4 @@ And apply it:
 kubectl apply -f frontend-netpol.yaml
 ```
 
-Try out if your app is still working, refresh the [https://example-frontend-<namespace>.<appdomain>/](https://example-frontend-<namespace>.<appdomain>/) in your browser and check if it is working again.
+Try out if your app is still working, refresh the frontend in your browser then check if it is working again.

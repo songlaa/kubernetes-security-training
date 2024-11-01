@@ -161,10 +161,10 @@ You should now see both `kubectl-pod` and `new-pod` in the output.
 
 Feel free to experiment by modifying the Role's permissions or testing different service accounts to better understand Kubernetes RBAC!
 
-{{% details title="🤔 Can I list secrets whith this service account?" %}}
+{{% details title="🤔 Can I list secrets with this service account?" %}}
 You did not include secrets in your role, so you cannot list secrets directly.
 
-However you have the right to start a pod in this namespace, if you happen to know the name of the secret (or guess it) you can mount any secret in this namespace to the pod an read it inside the pod!
+However, you have the right to start a pod in this namespace, if you happen to know the name of the secret (or guess it) you can mount any secret in this namespace to the pod and read it inside the pod!
 {{% /details %}}
 
 You can delete both pods and the service account after you have finished the lab:

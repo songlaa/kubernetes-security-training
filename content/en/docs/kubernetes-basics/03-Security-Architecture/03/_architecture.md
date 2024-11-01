@@ -4,13 +4,13 @@ weight: 2
 sectionnumber: 3.2
 ---
 
-In order to secure Kubernetes we want to understand its different components. For that we install a minimal kubernetes ourselves:
+In order to secure Kubernetes we want to understand its different components. For that, we install a minimal Kubernetes Distribution ourselves:
 
 ### {{% task %}} Install a Kubernetes Cluster
 
 For this task we need to switch to a VM, there we will install a Kubernetes Cluster using [kind](https://kind.sigs.k8s.io/)
 
-SSH into your VM, you can find the relevant IP in the file `welcome`
+SSH into your VM: You find the relevant command in the file `welcome`
 
 ```
 ssh -i /home/project/id-ecdsa <namespace>@159.69.155.196
@@ -24,33 +24,31 @@ chmod +x ./kind
 sudo mv ./kind /usr/local/bin/kind
 ```
 
-Similiar to kubernetes kind can be configured using a yaml resource, execute the command below to create the file `cluster.yaml`:
+Similar to Kubernetes `kind` can be configured using a yaml resource, execute the command below to create the file `cluster.yaml`:
 
 ```yaml
 cat <<EOF >> cluster.yaml
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
-featureGates:
-  PodSecurity: true
 nodes:
 - role: control-plane
 - role: worker
 EOF
 ```
 
-On your VM the `kind` binary is already installed to create a two node closter please execute:
+To create a two-node closter please execute:
 
 ```bash
 kind create cluster --config cluster.yaml
 ```
 
-After a while you should have a cluster running. Please check it with:
+After a while, you should have a cluster running. Please check it with:
 
 ```bash
 kubectl get nodes
 ```
 
-The goal now is to identify our minimal moving parts in kubernetes and address some security relevant features. By using kubectl you did use the standard config `~/.kube/config`. If you are curious you can check the used cert an see which user you are and the address of the API Server.
+The goal now is to identify our minimal moving parts in Kubernetes and address some security-relevant features. By using `kubectl` you did use the standard config `~/.kube/config`. If you are curious you can check the used cert and see which user you are and the address of the API Server.
 
 You find the main control plane parts in the `kube-system` namespace:
 
@@ -75,7 +73,7 @@ kube-proxy-s7g8c                             1/1     Running   0          43s
 kube-scheduler-kind-control-plane            1/1     Running   0          59s
 ```
 
-The core services for kubernetes are all here:
+The core services for Kubernetes are all here:
 
 * etcd-kind-control-plane: etcd is a key-value store used by Kubernetes to store all cluster data, including configuration, state, and other critical data
 * kindnet: kindnet is a CNI (Container Network Interface) plugin that handles networking for the Kind cluster.
@@ -90,7 +88,7 @@ We want to check our local Kubernetes Cluster using the CIS Kubernetes Benchmark
 
 ### {{% task %}} Check your clusters security
 
-We will run `kube-bench` directly in our kubernetes cluster using a Kubernetes job:
+We will run `kube-bench` directly in our Kubernetes cluster using a Kubernetes job:
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/aquasecurity/kube-bench/refs/heads/main/job.yaml
@@ -102,18 +100,18 @@ Wait for a few seconds for the job to complete
 kubectl get pods
 ```
 
-the results are held in the pod's logs (adjust the name)
+The results are held in the pod's logs (adjust the name)
 
 ```bash
 kubectl logs kube-bench-fpwnt
 ```
 
-We see that our `kind` cluster fails in the RBAC Section because it binds users the users `kubernetes` and in the group `kubeadm:cluster-admins` and binds it to the cluster-admin role to give it full privilege.
-Check also the different warnings for other sections, for a lot we already have the knowledge to remediation the issues. What we have notyet played around with is etcd. Let's to that:
+We see that our `kind` cluster fails in the RBAC Section because it binds the users `kubernetes` and the group `kubeadm:cluster-admins` to the cluster-admin role to give it full privileges.
+Check also the different warnings for other sections, for a lot we already have the knowledge to remediation the issues. What we have not yet played around with is `etcd`. Let's do that:
 
 ### {{% task %}} Read data in etcd
 
-We learned that the state of our cluster is stored in etcd, in kind etcd runs inside the cluster see `etcd-kind-control-plane`. Let us demonstrate that we can read secrets if we have access to the database
+We learned that the state of our cluster is stored in `etcd`, in `kind` `etcd` runs inside the cluster see `etcd-kind-control-plane`. Let us demonstrate that we can read secrets if we have access to the database.
 
 Create the secret first:
 
@@ -156,7 +154,7 @@ export ETCDCTL_KEY="/etc/kubernetes/pki/etcd/server.key"
 export ETCDCTL_ENDPOINTS="https://127.0.0.1:2379"
 ```
 
-You can see that etcd communication is encrypted using a pki. The ports used are 2379 (client to server), 2380 (replications) and 2381 for metrics.
+You can see that `etcd` communication is encrypted using a pki. The ports used are 2379 (client to server), 2380 (replications) and 2381 for metrics.
 
 Now list the keys in `etcd` to find where the secret is stored:
 
@@ -201,7 +199,7 @@ EOF
 ```
 
 The secret field is a base64-encoded 256-bit key. To enable encryption at rest, modify the kube-apiserver manifest to include the encryption provider configuration.
-We add the necessary flag using `sed` inplace editing
+We add the necessary flag using `sed` in place editing
 
 ```bash
 #check the file
@@ -214,7 +212,7 @@ cat /etc/kubernetes/manifests/kube-apiserver.yaml
 
 Kubernetes will automatically restart the kube-apiserver since it's running as a static pod.
 
-Recreate the secret to ensure it is encrypted (you need to open a new terminal and connect to the VM again)
+Recreate the secret to ensure it is encrypted (you need to open a new terminal and connect to the VM again). If you get errors wait a while until etcd recovers:
 
 ```bash
 kubectl get secret my-secret -n default -o yaml | kubectl apply -f -
@@ -234,6 +232,6 @@ exit
 
 Encrypting secret data with a locally managed key protects against an etcd compromise, but it fails to protect against a host compromise.
 
-To address this Kubernetes can use Managed (KMS) key storage: The KMS provider uses envelope encryption: Kubernetes encrypts resources using a data key, and then encrypts that data key using the managed encryption service. Kubernetes generates a unique data key for each resource. The API server stores an encrypted version of the data key in etcd alongside the ciphertext; when reading the resource, the API server calls the managed encryption service and provides both the ciphertext and the (encrypted) data key. Within the managed encryption service, the provider use a key encryption key to decipher the data key, deciphers the data key, and finally recovers the plain text. Communication between the control plane and the KMS requires in-transit protection, such as TLS.
+To address this Kubernetes can use Managed (KMS) key storage: The KMS provider uses envelope encryption: Kubernetes encrypts resources using a data key, and then encrypts that data key using the managed encryption service. Kubernetes generates a unique data key for each resource. The API server stores an encrypted version of the data key in etcd alongside the ciphertext; when reading the resource, the API server calls the managed encryption service and provides both the ciphertext and the (encrypted) data key. Within the managed encryption service, the provider uses a key encryption key to decipher the data key, deciphers the data key, and finally recovers the plain text. Communication between the control plane and the KMS requires in-transit protection, such as TLS.
 
-Kubernetes natively supports integration with external KMS providers like [HashiCorp Vault](https://github.com/hashicorp/vault), modern KMS tools have functions for data encryption, dynamic secrets, revocation and renawal of secrets.
+Kubernetes natively supports integration with external KMS providers like [HashiCorp Vault](https://github.com/hashicorp/vault), modern KMS tools have functions for data encryption, dynamic secrets, revocation and renewal of secrets.

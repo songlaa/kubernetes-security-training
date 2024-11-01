@@ -89,7 +89,7 @@ There are different kinds of Services:
 
 * `ClusterIP`: Default virtual IP address range
 * `NodePort`: Same as `ClusterIP` plus open ports on the nodes
-* `LoadBalancer`: An external load balancer is created, only works in cloud environments, e.g. AWS ELB
+* `LoadBalancer`: An external load balancer is created, this only works in cloud environments, e.g. AWS ELB
 * `ExternalName`: A DNS entry is created, also only works in cloud environments
 
 A Service is unique inside a Namespace.
@@ -134,4 +134,4 @@ Key features of Secrets:
 
 * Securely store sensitive data.
 * Prevent accidental exposure of critical information.
-* Access control ensures only authorized entities can read them.
+* Access control ensures that only authorized entities can read them.

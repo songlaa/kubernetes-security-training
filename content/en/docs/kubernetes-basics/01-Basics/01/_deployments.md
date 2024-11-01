@@ -4,15 +4,15 @@ weight: 2
 sectionnumber: 1.2
 ---
 
-We are finally ready to get started with Kubernetes. You should have been given the setup instrutions by your teacher and be logged in your own namespace.
+We are finally ready to get started with Kubernetes. You should have been given the setup instructions by your teacher and be logged in your namespace.
 
-In this lab, we are going to deploy our first container image and look at the concepts of Pods, Services, and Deployments.
+In this lab, we deploy our first container image and look at the concepts of Pods, Services, and Deployments.
 
 ## {{% task %}} Start and stop a single Pod
 
-We are going to have a look at deploying a pre-built container image from Quay.io or any other public container registry.
+We have a look at deploying a pre-built container image from Quay.io or any other public container registry.
 
-First, we are going to directly start a new Pod. For this we have to define our Kubernetes Pod resource definition. Create a new file `pod_awesome-app.yaml` with the content below.
+First, we start a new Pod. For this we have to define our Kubernetes Pod resource definition. Create a new file `pod_awesome-app.yaml` with the content below.
 
 ```yaml
 apiVersion: v1
@@ -41,12 +41,12 @@ kubectl apply -f pod_awesome-app.yaml --namespace <namespace>
 ```
 
 The output should be:
-as
+
 ```
 pod/awesome-app created
 ```
 
-Use kubectl get pods --namespace <namespace>` in order to show the running Pod:
+Use kubectl get pods --namespace <namespace>` to show the running Pod:
 
 ```bash
 kubectl get pod awesome-app --namespace <namespace>
@@ -67,7 +67,7 @@ kubectl delete pod awesome-app --namespace <namespace>
 
 ## {{% task %}} Create a Deployment
 
-In some use cases it can make sense to start a single Pod. But this has its downsides and is not really a common practice. Let's look at another concept which is tightly coupled with the Pod: the so-called _Deployment_. A Deployment ensures that a Pod is monitored and checks that the number of running Pods corresponds to the number of requested Pods.
+In some use cases, it can make sense to start a single Pod. But this has its downsides and is not really a common practice. Let's look at another concept which is tightly coupled with the Pod: the so-called _Deployment_. A Deployment ensures that a Pod is monitored and checks that the number of running Pods corresponds to the number of requested Pods.
 
 To create a new Deployment we first define our Deployment in a new file `deployment_example-frontend.yaml` with the content below.
 
@@ -112,7 +112,7 @@ spec:
               memory: 128Mi
 ```
 
-And with this we create our Deployment inside our already created namespace:
+With this, we create our Deployment inside our already created namespace:
 
 ```bash
 kubectl apply -f deployment_example-frontend.yaml --namespace <namespace>
@@ -124,11 +124,11 @@ The output should be:
 deployment.apps/example-frontend created
 ```
 
-kubernetes creates the defined and necessary resources, pulls the container image (in this case from Quay.io) and deploys the Pod.
+Kubernetes creates the defined and necessary resources, pulls the container image (in this case from Quay.io) and deploys the Pod.
 
 Examine the deployment yaml more closely and discuss it with each other. Where do we configure our resource usage and how do we handle High Availabilty and our update strategy in our code?
 
-Use the command `kubectl get` with the `-w` parameter in order to get the requested resources and afterward watch for changes.
+Use the command `kubectl get` with the `-w` parameter to get the requested resources and afterward watch for changes.
 
 {{% alert title="Note" color="info" %}}
 The `kubectl get -w` command will never end unless you terminate it with `CTRL-c`.
@@ -150,7 +150,7 @@ watch kubectl get pods --namespace <namespace>
 This process can last for some time depending on your internet connection and if the image is already available locally.
 
 {{% alert title="Note" color="info" %}}
-If you want to create your own container images and use them with kubernetes, you definitely should have a look at [these best practices](https://docs.openshift.com/container-platform/latest/openshift_images/create-images.html) and apply them. This image creation guide may be for OpenShift, however it also applies to Kubernetes and other container platforms.
+If you want to create your own container images and use them with Kubernetes, you definitely should have a look at [these best practices](https://docs.openshift.com/container-platform/latest/openshift_images/create-images.html) and apply them. This image creation guide may be for OpenShift, however it also applies to Kubernetes and other container platforms.
 {{% /alert %}}
 
 ### Creating Kubernetes resources
@@ -161,7 +161,7 @@ You've already seen one way: Writing the resource's definition in YAML (or JSON)
 The other variant is to use helper commands. These are more straightforward: You don't have to copy a YAML definition from somewhere else and then adapt it.
 However, the result is the same. The helper commands just simplify the process of creating the YAML definitions.
 
-As an example, let's look at creating above deployment, this time using a helper command instead. If you already created the Deployment using above YAML definition, you don't have to execute this command:
+As an example, let's look at creating the above deployment, this time using a helper command instead. If you already created the Deployment using the above YAML definition, you don't have to execute this command:
 
 ```yaml
 kubectl create deployment example-frontend --image={{% param "containerImages.deployment-image-url" %}} --namespace <namespace>
@@ -188,23 +188,23 @@ A [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deploym
   * ImagePullPolicy
 * The number of Pods/Replicas that should be deployed
 
-By using the `-o` (or `--output`) parameter we get a lot more information about the deployment itself. You can choose between YAML and JSON formatting by indicating `-o yaml` or `-o json`. In this training we are going to use YAML, but please feel free to replace `yaml` with `json` if you prefer.
+By using the `-o` (or `--output`) parameter we get a lot more information about the deployment itself. You can choose between YAML and JSON formatting by indicating `-o yaml` or `-o json`. In this training, we are going to use YAML, but please feel free to replace `yaml` with `json` if you prefer.
 
 ```bash
 kubectl get deployment example-frontend -o yaml --namespace <namespace>
 ```
 
-After the image has been pulled, kubernetes deploys a Pod according to the Deployment:
+After the image has been pulled, Kubernetes deploys a Pod according to the Deployment:
 
 ```bash
 kubectl get pods --namespace <namespace>
 ```
 
-which gives you an output similar to this:
+Which gives you an output similar to this:
 
 ```
 NAME                              READY   STATUS    RESTARTS   AGE
 example-frontend-69b658f647-xnm94   1/1     Running   0          39s
 ```
 
-The Deployment defines that one replica should be deployed --- which is running as we can see in the output. This Pod is not yet reachable from outside the cluster.
+The Deployment defines that one replica should be deployed, we see that in the output. This Pod is not yet reachable from outside the cluster.

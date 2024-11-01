@@ -12,7 +12,7 @@ This includes:
 * Identifying suspicious network activity (e.g., unexpected connections or port scans).
 * Tracking system calls for unauthorized actions (e.g., privilege escalation attempts).
 
-Falco is an open source Kubernetes threat detection engines. It Falco detects unexpected application behavior and alerts on threats at runtime.  At the core of Falco is its driver responsible for monitoring (container) syscalls and forwarding them to userspace for analysis.
+Falco is an open-source Kubernetes threat detection engine. It detects unexpected application behavior and alerts on threats at runtime.  At the core of Falco is its driver responsible for monitoring (container) syscalls and forwarding them to userspace for analysis.
 
 ### {{% task %}} Install Falco on kind
 
@@ -41,9 +41,9 @@ Falco pod(s) might need a bit to start. Wait until they are ready:
 kubectl wait pods --for=condition=Ready --all -n falco
 ```
 
-Falco comes with a [pre-installed set of rules](https://github.com/falcosecurity/rules/blob/main/rules/falco_rules.yaml) that alert you upon suspicious behavior. We can check this by triggering such a rule
+Falco comes with a [pre-installed set of rules](https://github.com/falcosecurity/rules/blob/main/rules/falco_rules.yaml) that alert you upon suspicious behavior. We can check this by triggering such a rule.
 
-One of this default rule is a log entry everytime a shell is opened in a pod, let us do that:
+One of these default rules is a log entry every time a shell is opened in a pod, let us do that:
 
 ```bash
 kubectl exec -it -n test-kyverno alpine-pod -- sh 
@@ -61,9 +61,9 @@ You will see logs for all the Falco pods deployed on the system. The Falco pod c
 09:13:33.058953225: Notice A shell was spawned in a container with an attached terminal (evt_type=execve user=root user_uid=1000 user_loginuid=-1 process=sh proc_exepath=/bin/busybox parent=containerd-shim command=sh terminal=34816 exe_flags=EXE_LOWER_LAYER container_id=198e59c8bb67 container_image=docker.io/library/alpine container_image_tag=latest container_name=alpine k8s_ns=test-kyverno k8s_pod_name=alpine-pod)
 ```
 
-We could forward the logs of the falco deamonset to a central instance and alert on certain events there.
+We could forward the logs of the Falco daemonset to a central instance and alert on certain events there.
 
-In a previous chapter we mentioned, that is is possible to read secretes by executing a pod and mounting the secret. This is exactly a situation where we can use a runtime security tool like falco. Let us demonstrate that:
+In a previous chapter we mentioned, that it is possible to read secrets by executing a pod and mounting the secret. This is exactly a situation where we can use a runtime security tool like Falco. Let us demonstrate that:
 
 ```bash
 #create the cert
@@ -106,7 +106,7 @@ EOF
 kubectl apply -f secret-mount-pod.yaml
 ```
 
-You created a webserver wich uses a certificate from a secret to encrypt its communication. Now, let’s create a Falco rule that triggers an alert if any process other than nginx accesses the mounted secret files (the certificate and private key).
+You created a webserver which uses a certificate from a secret to encrypt its communication. Now, let’s create a Falco rule that triggers an alert if any process other than nginx accesses the mounted secret files (the certificate and private key).
 
 Create a yaml named `falco_custom_rules_cm.yaml` with your custom rule:
 
@@ -151,4 +151,4 @@ And again check the logs:
 kubectl logs -l app.kubernetes.io/name=falco -n falco -c falco | grep nginx
 ```
 
-We saw that we can create alerts for different use cases. The Falco default ruleset is just a start you need create rules according to your own needs and requirements in your cluster.
+We saw that we can create alerts for different use cases. The Falco default ruleset is just a start you need to create rules according to your own needs and requirements in your cluster.

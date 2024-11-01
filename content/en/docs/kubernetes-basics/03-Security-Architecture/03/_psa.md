@@ -7,7 +7,7 @@ sectionnumber: 3.3
 
 ## Pod Security Admission (PSA)
 
-Kubernetes **Pod Security Admission (PSA)** is a mechanism designed to enforce security policies on pods based on predefined security profiles (so called **Pod Security Standards (PSS)**). It provides a way to ensure that pods meet certain security standards before they are allowed to run in a Kubernetes cluster.
+Kubernetes **Pod Security Admission (PSA)** is a mechanism designed to enforce security policies on pods based on predefined security profiles (so-called **Pod Security Standards (PSS)**). It provides a way to ensure that pods meet certain security standards before they are allowed to run in a Kubernetes cluster.
 
 PSA works by evaluating pod security based on [three profiles](https://kubernetes.io/docs/concepts/security/pod-security-standards/):
 
