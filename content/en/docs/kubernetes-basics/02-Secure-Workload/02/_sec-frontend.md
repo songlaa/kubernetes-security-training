@@ -190,7 +190,7 @@ and apply it using:
 kubectl apply -f deployment_example-frontend.yaml --namespace <namespace>
 ```
 
-Like this we can make sure that we don't run any container in our deployment as root, have minimum capabilites a readonly file-system.
+Like this we can make sure that we don't run any container in our deployment as root, have minimum capabilites a read-only file system.
 
 {{% alert title="Note" color="info" %}}
 

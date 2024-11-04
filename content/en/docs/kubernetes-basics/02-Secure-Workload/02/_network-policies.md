@@ -483,51 +483,43 @@ Cilium extends the capabilities of Kubernetes network policies to support not on
 Create a new deployment named curl-deployment using the curlimages/curl image and set the command to sleep indefinitely:
 
 ```bash
-kubectl create deployment curl-deployment --image=curlimages/curl -- sleep infinity
-
+kubectl apply -f - <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: curl-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: curl-deployment
+  template:
+    metadata:
+      labels:
+        app: curl-deployment
+    spec:
+      containers:
+      - name: curl-container
+        image: curlimages/curl
+        command: ["sleep", "infinity"]
+      dnsConfig:
+        options:
+        - name: ndots
+          value: "1" #this option is here because it avoids adding .svc.cluster.local. to dns queries
+EOF
 ```
 
-Use kubectl run to test connectivity to pastebin.org and songlaa.com:
-
-```bash
-kubectl exec -it deploy/curl-deployment -- sh
-```
-
-inside the pod
-
-```bash
-curl -m 5 -LI https://www.zhaw.ch
-echo "---"
-curl -m 5 -LI https://songlaa.com
-
-```
-
-and then exit
-
-```bash
-exit
-```
+Use kubectl exec to test connectivity to `www.zhaw.ch` and `songlaa.com`.
 
 Note the results of these commands. By default, if no network policies are applied, the pod should be able to reach both sites.
 
-Write a Cilium NetworkPolicy named songlaa that only allows HTTP/S traffic to songlaa.com. [Here](https://docs.cilium.io/en/stable/security/policy/language/#dns-based) is a link to the documentation.
+Write a Cilium NetworkPolicy named songlaa that only allows HTTP/S traffic to `songlaa.com`. [Here](https://docs.cilium.io/en/stable/security/policy/language/#dns-based) is a link to the documentation.
 
-Now try it again, it should only allow requests to songlaa.com
+Now try it again, it should only allow requests to `songlaa.com`
 
-```bash
-kubectl exec -it deploy/curl-deployment -- sh
-```
+At this point, you may believe you've successfully blocked all egress traffic—until you learn about [DNS tunneling](https://brightsec.com/blog/dns-tunneling/). To address this potential vulnerability, you need to enhance your Cilium Network Policy further. Specifically, you should block all DNS queries except those directed to `songlaa.com`. For detailed guidance on configuring DNS policies, refer to the [Cilium DNS documentation](https://docs.cilium.io/en/stable/security/dns/).
 
-inside the pod
-
-```bash
-curl -m 5 -LI https://www.zhaw.ch
-echo "---"
-curl -m 5 -LI https://songlaa.com
-
-```
-
-If you did it you can cleanup the deplyomente and the NetworkPolicy:
+If you did succeed you can cleanup the deplyoment and the Cilium NetworkPolicy:
 
 ```bash
 kubectl delete deployment curl-deployment
