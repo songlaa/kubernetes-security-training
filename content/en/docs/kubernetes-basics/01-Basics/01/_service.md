@@ -212,7 +212,7 @@ Now that we've covered how to create a Deployment, Service, and Ingress resource
 * `http://example-frontend-><namespace>.<appdomain>/headers` and a second Ingress that responds to
 * `http://example-httpbin-><namespace>.<appdomain>`
 
-Tip: Use imperative commands with --dry-run=client -o yaml to preview the resource definitions before applying them.
+Tip: Use imperative commands with `--dry-run=client -o yaml` to preview the resource definitions before applying them.
 
 ## {{% task %}} For fast learners
 
