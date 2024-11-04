@@ -17,7 +17,7 @@ spec:
              protocol: ANY
           rules:
             dns:
-              - matchPattern: "*"
+              - matchPattern: "songlaa.com"
     - toFQDNs:
         - matchName: "songlaa.com"
 
