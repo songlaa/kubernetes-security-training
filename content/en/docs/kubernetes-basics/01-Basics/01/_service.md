@@ -204,10 +204,10 @@ lab-2   Ready    controlplane,etcd,worker   150m   v1.17.4   5.102.145.77    <no
 lab-3   Ready    controlplane,etcd,worker   150m   v1.17.4   5.102.145.148   <none>        Ubuntu 18.04.3 LTS   4.15.0-66-generic   docker://19.3.8
 ```
 
-## {{% task %}} Bring it all together
+## {{% task %}} (Advanced) Bring it all together
 
-Now that we've covered how to create a Deployment, Service, and Ingress resource, it's your turn to try it on your own. Create a Deployment with two pods using the image go-httpbin
-.15.0. Expose this Deployment using a Service, and set up an Ingress that responds to:
+Now that we've covered how to create a Deployment, Service, and Ingress resource, it's your turn to try it on your own. Create a Deployment with two pods using the image [go-httpbin:2
+.15.0](https://hub.docker.com/r/mccutchen/go-httpbin/tags). Expose this Deployment using a Service, and set up an Ingress that responds to:
 
 * `http://example-frontend-><namespace>.<appdomain>/headers` and a second Ingress that responds to
 * `http://example-httpbin-><namespace>.<appdomain>`
