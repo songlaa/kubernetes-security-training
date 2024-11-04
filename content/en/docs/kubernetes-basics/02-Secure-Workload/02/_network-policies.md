@@ -475,3 +475,61 @@ kubectl apply -f frontend-netpol.yaml
 ```
 
 Try out if your app is still working, refresh the frontend in your browser then check if it is working again.
+
+## {{% task %}} (Advanced) Cilium Network Policies on Layer 7
+
+Cilium extends the capabilities of Kubernetes network policies to support not only Layer 3/4 (IP addresses and ports) but also Layer 7 (application-level protocols like HTTP). This allows you to create more granular policies, such as restricting paths, methods, or domain names as shown in this lab. This helps enforce security policies that align with application logic and business requirements.
+
+Create a new deployment named curl-deployment using the curlimages/curl image and set the command to sleep indefinitely:
+
+```bash
+kubectl create deployment curl-deployment --image=curlimages/curl -- sleep infinity
+
+```
+
+Use kubectl run to test connectivity to pastebin.org and songlaa.com:
+
+```bash
+kubectl exec -it deploy/curl-deployment -- sh
+```
+
+inside the pod
+
+```bash
+curl -m 5 -LI https://www.zhaw.ch
+echo "---"
+curl -m 5 -LI https://songlaa.com
+
+```
+
+and then exit
+
+```bash
+exit
+```
+
+Note the results of these commands. By default, if no network policies are applied, the pod should be able to reach both sites.
+
+Write a Cilium NetworkPolicy named songlaa that only allows HTTP/S traffic to songlaa.com. [Here](https://docs.cilium.io/en/stable/security/policy/language/#dns-based) is a link to the documentation.
+
+Now try it again, it should only allow requests to songlaa.com
+
+```bash
+kubectl exec -it deploy/curl-deployment -- sh
+```
+
+inside the pod
+
+```bash
+curl -m 5 -LI https://www.zhaw.ch
+echo "---"
+curl -m 5 -LI https://songlaa.com
+
+```
+
+If you did it you can cleanup the deplyomente and the NetworkPolicy:
+
+```bash
+kubectl delete deployment curl-deployment
+kubectl delete CiliumNetworkPolicy songlaa
+```
