@@ -1,3 +1,4 @@
+# it will NOT work before implementing this policy because there is a catch-all rule only allowing DNS
 apiVersion: "cilium.io/v2"
 kind: CiliumNetworkPolicy
 metadata:

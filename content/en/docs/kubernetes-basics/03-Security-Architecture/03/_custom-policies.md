@@ -169,4 +169,4 @@ kubectl apply -f alpine-pod.yaml
 
 To improve security many companies run private container registries nowadays. The goal is to enforce that you can only run images from your certain registries.
 
-Create a Kyverno Policy with "Audit" Level which checks if your images (i.e. [quay.io/jitesoft/alpine](quay.io/jitesoft/alpine)) are pulled from quay.io and warns about that.
+Create a Kyverno Policy with "Audit" Level which checks if your images (i.e. [quay.io/jitesoft/alpine](https://quay.io/repository/jitesoft/alpine?tab=tags&tag=latest)) are pulled from quay.io and creates a log audit entry if that is the case.

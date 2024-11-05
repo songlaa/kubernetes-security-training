@@ -14,4 +14,4 @@ spec:
       ports:
         - containerPort: 8080
           name: http
-# to call: kubectl exec -it multi-container-pod -c curl-container -- curl localhost:808
+# to call: kubectl exec -it multi-container-pod -c curl-container -- curl localhost:8080
