@@ -167,6 +167,6 @@ kubectl apply -f alpine-pod.yaml
 
 ## {{% task %}} (Advanced) Private Container Registries
 
-To improve security many companies run private container registries nowadays. The goal is to enforce that you can only run images from your own registry.
+To improve security many companies run private container registries nowadays. The goal is to enforce that you can only run images from your certain registries.
 
-Create a Kyverno Policy with "Audit" Level which checks if your images are from docker.io. Then try to run an image from annoter registry like quay.io i.e. [quay.io/jitesoft/alpine](quay.io/jitesoft/alpine). As most images from docker.io don't have the prefix you can also just exclude quay.io for demonstration purposes.
+Create a Kyverno Policy with "Audit" Level which checks if your images (i.e. [quay.io/jitesoft/alpine](quay.io/jitesoft/alpine)) are pulled from quay.io and warns about that.
