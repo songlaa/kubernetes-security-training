@@ -107,7 +107,6 @@ spec:
 
 The application consists of two client deployments (`frontend` and `not-frontend`) and one backend deployment (`backend`). We are going to send requests from the frontend and not-frontend pods to the backend pod.
 
-Create a file `simple-app.yaml` with the above content.
 
 Deploy the app:
 

@@ -214,6 +214,6 @@ The Deployment defines that one replica should be deployed, we see that in the o
 We learned that a pod can consist of more than one container. Create a Pod with 2 containers running. You can use the following images:
 
 * [curl](https://hub.docker.com/r/curlimages/curl), use this image with the [command](https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/) `sleep 3600`
-* [nginx](nginxinc/nginx-unprivileged), use this image to start a webserver
+* [nginx](https://hub.docker.com/r/nginxinc/nginx-unprivileged/tags), use this image to start a webserver
 
 Then exec into the container with the `curl` image and call the `nginx` container to verify communication between them.

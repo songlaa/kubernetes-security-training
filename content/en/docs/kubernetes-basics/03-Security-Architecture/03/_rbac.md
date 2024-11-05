@@ -73,7 +73,7 @@ kubectl get serviceaccount
 Next, we will create a pod that uses the newly created <namespace>-sa service account.
 
 ```bash
-kubectl run kubectl-pod --image=bitnami/kubectl --restart=Never --overrides='{ "spec": { "serviceAccount": "<namespace>-sa" }}' -- sleep infinity
+kubectl run kubectl-pod --image=beli/kubectl-shell --restart=Never --overrides='{ "spec": { "serviceAccount": "<namespace>-sa" }}' -- sleep infinity
 ```
 
 We are ready to use kubectl from within our pod to list all pods in the namespace using the `<namespace>-sa` service account:
@@ -86,7 +86,7 @@ You will likely see a permission denied error because `<namespace>-sa` does not 
 
 To allow the `<namespace>-sa` service account to list and create pods, we need to create a Role that grants these permissions.
 
-Create a file called `role.yaml` to define a Role that allows listing and creating pods:
+Create a file called `role.yaml` to define a Role that allows listing and creating pods and logs:
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -97,7 +97,13 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["pods"]
-  verbs: ["list", "create"]
+  verbs: ["list", "get", "create"]
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["list", "get"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create"]
 ```
 
 apply the Role:
@@ -117,11 +123,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: pod-manager-binding
-  namespace: default
+  namespace: <namespace>
 subjects:
 - kind: ServiceAccount
   name: <namespace>-sa
-  namespace: default
+  namespace: <namespace>
 roleRef:
   kind: Role
   name: pod-manager
@@ -135,15 +141,6 @@ kubectl apply -f rolebinding.yaml
 ```
 
 The `<namespace>-sa` service account is now bound to the `pod-manager` Role, and can list and create pods in the `<namespace>` namespace.
-
-Kubernetes provides the `kubectl auth can-i` command to check if a specific action is allowed for a user or service account.
-
-```bash
-kubectl auth can-i list pods --as=system:serviceaccount:<namespace>:<namespace>-sa -n <namespace>
-kubectl auth can-i create pods --as=system:serviceaccount:<namespace>:<namespace>-sa -n <namespace>
-```
-
-Both commands should return `yes` now that the Role and RoleBinding are in place.
 
 Now use the Service Account to create a new Pod
 
@@ -166,6 +163,14 @@ You did not include secrets in your role, so you cannot list secrets directly.
 
 However, you have the right to start a pod in this namespace, if you happen to know the name of the secret (or guess it) you can mount any secret in this namespace to the pod and read it inside the pod!
 {{% /details %}}
+
+## {{% task %}} (Advanced) Mount secrets without direct permissions
+
+Prove the answer to above question. Create secret and then start a pod with the service account mounting the secret.
+
+After you successfully accomplished this. You can create a new role to include secrets read in the namespace for the service account too.
+
+### Cleanup
 
 You can delete both pods and the service account after you have finished the lab:
 
