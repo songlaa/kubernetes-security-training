@@ -1,0 +1,21 @@
+apiVersion: kyverno.io/v1
+kind: Policy
+metadata:
+  name: restrict-image-registry
+spec:
+  validationFailureAction: Audit
+  rules:
+    - name: validate-image-registry
+      match:
+        resources:
+          kinds:
+            - Pod
+      validate:
+        message: "Container images mustn't be pulled from quay.io."
+        pattern:
+          spec:
+            containers:
+              - image: "!*quay.io/*"
+# kubectl run --image quay.io/jitesoft/alpine alpine-quay 
+# kubectl describe policy restrict-image-registry
+
