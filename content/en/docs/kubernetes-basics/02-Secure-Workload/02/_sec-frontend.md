@@ -228,4 +228,4 @@ We could use stricter seccomp profiles for certain pods or log the usage of cert
 
 Task 1.2.4: (Advanced) Secure the pod with two containers
 
-Remember the Pod with 2 containers from previous tasks? Does it need all capabilities and root rights? Please add the necessary security context to it and see if it still runs.
+Remember the Pod with 2 containers from previous tasks? Does it need all capabilities and root rights? Please add the necessary security context to it and see if it still runs and you can call the nginx container from the curl container through localhost.

@@ -164,3 +164,9 @@ Let us now enforce our policy, switch the `Audit` to `Enforce` in `drop-policy.y
 nano alpine-pod.yaml
 kubectl apply -f alpine-pod.yaml
 ```
+
+## {{% task %}} (Advanced) Private Container Registries
+
+To improve security many companies run private container registries nowadays. The goal is to enforce that you can only run images from your own registry.
+
+Create a Kyverno Policy with "Audit" Level which checks if your images are from docker.io. Then try to run an image from annoter registry like quay.io i.e. [quay.io/jitesoft/alpine](quay.io/jitesoft/alpine). As most images from docker.io don't have the prefix you can also just exclude quay.io for demonstration purposes.
