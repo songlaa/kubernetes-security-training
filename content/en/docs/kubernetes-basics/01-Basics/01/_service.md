@@ -209,8 +209,8 @@ lab-3   Ready    controlplane,etcd,worker   150m   v1.17.4   5.102.145.148   <no
 Now that we've covered how to create a Deployment, Service, and Ingress resource, it's your turn to try it on your own. Create a Deployment with two pods using the image [go-httpbin:2
 .15.0](https://hub.docker.com/r/mccutchen/go-httpbin/tags). Expose this Deployment using a Service, and set up an Ingress that responds to:
 
-* `http://example-frontend-><namespace>.<appdomain>/headers` and a second Ingress that responds to
-* `http://example-httpbin-><namespace>.<appdomain>`
+* [http://example-frontend-<namespace>.<appdomain>/headers](http://example-frontend-<namespace>.<appdomain>/headers)` and a second Ingress that responds to
+* [http://example-httpbin-<namespace>.<appdomain>](http://example-httpbin-<namespace>.<appdomain>)
 
 Tip: Use imperative commands with `--dry-run=client -o yaml` to preview the resource definitions before applying them.
 

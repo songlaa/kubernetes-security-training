@@ -225,3 +225,7 @@ You could also create your own seccomp profile store it on the nodes and add it 
 ```
 
 We could use stricter seccomp profiles for certain pods or log the usage of certain syscalls in our environment like this.
+
+Task 1.2.4: (Advanced) Secure the pod with two containers
+
+Remember the Pod with 2 containers from previous tasks? Does it need all capabilities and root rights? Please add the necessary security context to it and see if it still runs.
