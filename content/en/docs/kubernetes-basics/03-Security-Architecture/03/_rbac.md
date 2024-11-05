@@ -82,7 +82,7 @@ We are ready to use kubectl from within our pod to list all pods in the namespac
 kubectl exec -it kubectl-pod -- kubectl get pods
 ```
 
-You will likely see a permission denied error because `<namespace>-sa` does not have the required permissions to list pods.
+You will likely see a permission denied error because `<namespace>-sa` does not have the required permissions to list pods. If you have a timeout error, try to guess what could cause it and find/correct the misconfiguration.
 
 To allow the `<namespace>-sa` service account to list and create pods, we need to create a Role that grants these permissions.
 
