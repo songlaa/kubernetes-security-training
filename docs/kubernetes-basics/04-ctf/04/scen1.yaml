@@ -1,0 +1,43 @@
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
+#  ____  ____   ___ ___ _     _____ ____        _    _     _____ ____ _____  #
+# / ___||  _ \ / _ \_ _| |   | ____|  _ \      / \  | |   | ____|  _ \_   _| #
+# \___ \| |_) | | | | || |   |  _| | |_) |    / _ \ | |   |  _| | |_) || |   #
+#  ___) |  __/| |_| | || |___| |___|  _ <    / ___ \| |___| |___|  _ < | |   #
+# |____/|_|    \___/___|_____|_____|_| \_\  /_/   \_\_____|_____|_| \_\|_|   #
+#                                                                            #
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
+apiVersion: v1
+kind: Pod
+metadata:
+  name: super-serious-secure-app
+  labels:
+    ctf: step1
+    security: enterprise
+spec:
+  terminationGracePeriodSeconds: 0
+  containers:
+    - name: we-are-serious
+      image: ubuntu
+      command:
+        - /bin/bash
+      args:
+        - "-c"
+        - "$(: please look away, the flag is just here base64 encoded but you should not find it by looking here)
+          echo c29uZ2xhYS1iZWdpbm5lcgo= | base64 -d > /tmp/super_secr3t.secured && sleep infinity"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: reverse-shell
+  labels:
+    app: reverse-shell
+spec:
+  containers:
+  - name: ubuntu
+    image: ubuntu:22.04
+    command: ["sleep", "infinity"]
+    securityContext:
+      privileged: true
+  restartPolicy: Never
+
+
