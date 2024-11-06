@@ -29,11 +29,13 @@ Then install Falco:
 helm install --replace falco --namespace falco --create-namespace --set tty=true falcosecurity/falco
 ```
 
-And check that the Falco pods are running:
+And check that the Falco pods are running.
 
 ```bash
 kubectl get pods -n falco
 ```
+
+If they fail you might have hit [this issue](https://github.com/falcosecurity/falco/issues/3119), change the falco deamonset and add the env var FALCOCTL_ARTIFACT_NOVERIFY to the `falcoctl-artifact-install` container.
 
 Falco pod(s) might need a bit to start. Wait until they are ready:
 
