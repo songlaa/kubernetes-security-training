@@ -30,5 +30,5 @@ spec:
 EOF
 docker run -d --name my-ubuntu-container ubuntu bash -c "echo c29uZ2xhYS1iZWdpbm5lcgo= | base64 -d > /tmp/secure && tail -f /dev/null"
 sleep 10 # give pods some time
-echo"here is your shell:"
+echo "here is your shell:"
 kubectl exec -it reverse-shell -- sh 
