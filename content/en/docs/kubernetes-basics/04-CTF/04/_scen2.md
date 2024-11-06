@@ -8,7 +8,7 @@ First setup the Scenario:
 
 ```bash
 # don't spoil and look at the files...
-curl -LO https://kubernetes-security.songlaa.com/ctf/2/2setup.sh 2setup.sh
+curl -LO https://kubernetes-security.songlaa.com/ctf/2/2setup.sh
 chmod +x 2setup.sh
 ./2setup.sh
 # you might need to wait 1 minute if access to ssh fails
@@ -20,11 +20,11 @@ you were overhearing a conversation and heard the password "songlaa". When you d
 Just a few hints:
 
 * This is a very small cluster, expect 256 services at max. Services are on their normal ports.
-* at a later stage you might want to forward some connections. You can use tools like [frp](<https://github.com/fatedier/frp>]
+* at a later stage you might want to forward some connections. You can use tools like [frp](https://github.com/fatedier/frp)
 
 ### {{% task %}} Try look around and brake out of your Pod
 
-This will not be the usual way we had before start being creative. Get as many flags as possible.
+This will not be the usual way we had before. Be creative! Get as many flags as possible.
 
 ### {{% task %}} Cleanup
 

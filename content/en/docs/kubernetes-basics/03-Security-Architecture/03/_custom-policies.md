@@ -142,7 +142,7 @@ Because the Action is only set to `Audit` noncompliant resources are only logged
 kubectl -n test-kyverno describe policies.kyverno.io enforce-readonly-filesystem
 ```
 
-Let us now enforce our policy, switch the `Audit` to `Enforce` in `drop-policy.yaml` and apply it again:
+Let us now enforce our policy, switch the `Audit` to `Enforce` in `read-only.yaml` and apply it again:
 
 ```bash
 nano read-only.yaml
@@ -169,4 +169,4 @@ kubectl apply -f alpine-pod.yaml
 
 To improve security many companies run private container registries nowadays. The goal is to enforce that you can only run images from your certain registries.
 
-Create a Kyverno Policy with "Audit" Level which checks if your images (i.e. [quay.io/jitesoft/alpine](https://quay.io/repository/jitesoft/alpine?tab=tags&tag=latest)) are pulled from quay.io and creates a log audit entry if that is the case.
+Create a Kyverno Policy with "Audit" Level which checks if your images (i.e. [quay.io/jitesoft/alpine](https://quay.io/repository/jitesoft/alpine?tab=tags&tag=latest)) are pulled from quay.io and creates a log audit entry if that is the case. Then test this policy by running a pod with an image from quay.io.
