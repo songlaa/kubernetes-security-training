@@ -41,3 +41,9 @@ We simply mount the working directory into a running container, where hugo is st
 export HUGO_VERSION=$(grep -oP "(?<=hugo-version: ')[^']*(?=')" .github/workflows/hugo.yaml)
 docker run --rm --publish 8080:8080 --volume $(pwd):/src floryn90/hugo:$HUGO_VERSION-ext-ubuntu server --port 8080
 ```
+
+### TODO - next Training
+
+* check if <https://stackoverflow.com/questions/53053888/where-is-the-complete-list-of-kubernetes-objects> works in webshell and add to rbac training
+* create a graphic showing the request flow internet --> ingress --> svc --> pod for the lab
+* explore the possibilty to expose a kubernetes dashboard with a student link (gui for beginners)
